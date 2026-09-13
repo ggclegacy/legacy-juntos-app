@@ -46,6 +46,7 @@ import {
 import { demoRecords, demoMembers, NEIL, WORKSPACE } from "@/lib/demo";
 import { Editor, Modal, kindLabel } from "./editor";
 import { AiPanel } from "./ai-panel";
+import { useMaterialMotion } from "./material-motion";
 
 type View = "home" | Domain;
 const NAV: { id: View; label: string; icon: LucideIcon; group?: string }[] = [
@@ -181,6 +182,7 @@ function Mark() {
   );
 }
 export function Sanctuary() {
+  useMaterialMotion();
   const sessionEpoch = useRef(0),
     refreshVersion = useRef(0);
   const [demo, setDemo] = useState(!configured),
@@ -748,6 +750,19 @@ export function Sanctuary() {
           </div>
         )}
         <main id="main">
+          <div className="space-introduction">
+            <div>
+              <span className="eyebrow" lang="pt-BR">
+                NOSSO ESPAÇO
+              </span>
+              <span className="space-intro-title">
+                Your world, beautifully connected.
+              </span>
+            </div>
+            <span className="space-intro-note">
+              <span /> Rooted in purpose. Alive with possibility.
+            </span>
+          </div>
           <div className="page-controls">
             <div className="segmented">
               <button
@@ -803,9 +818,11 @@ export function Sanctuary() {
           {view === "home" && !query ? (
             <>
               <section className="hero">
+                <div className="hero-artwork" aria-hidden="true" />
                 <div className="hero-copy">
                   <span className="eyebrow">
-                    <span className="gold-line" /> A LIFE, INTENTIONALLY SHARED
+                    <span className="gold-line" />{" "}
+                    <span lang="pt-BR">DUAS VIDAS. UM HORIZONTE.</span>
                   </span>
                   <h1>
                     {scope === "shared" ? (
@@ -835,20 +852,17 @@ export function Sanctuary() {
                     <ArrowUpRight size={16} />
                   </button>
                 </div>
-                <div className="horizon-art" aria-hidden="true">
-                  <div className="sun-disc" />
-                  <div className="orbit orbit-one" />
-                  <div className="orbit orbit-two" />
-                  <div className="mountain mountain-back" />
-                  <div className="mountain mountain-front" />
-                  <span className="art-coordinate">
+                <div className="horizon-signature" aria-hidden="true">
+                  <span className="signature-star">✧</span>
+                  <span>
                     INDIVIDUALLY ROOTED
                     <br />
                     TOGETHER, BECOMING
                   </span>
-                  <span className="art-monogram">J</span>
                 </div>
-                <span className="hero-number">01 — JUNTOS</span>
+                <span className="hero-number">
+                  <span lang="pt-BR">JUNTOS</span> · TOGETHER, BY DESIGN
+                </span>
               </section>
               <div className="home-heading">
                 <div>

@@ -222,3 +222,23 @@ test("protected API routes reject unauthenticated access", async ({
   const ai = await request.post("/api/ai", { data: { message: "hello" } });
   expect(ai.status()).toBe(401);
 });
+
+test("material depth respects pointer and reduced-motion preferences", async ({
+  page,
+  isMobile,
+}) => {
+  await start(page);
+  const art = await page.request.get("/art/juntos-horizon.webp");
+  expect(art.ok()).toBe(true);
+  const card = page.locator(".pathway").first();
+  await card.scrollIntoViewIfNeeded();
+  if (!isMobile) {
+    await card.hover({ position: { x: 30, y: 30 } });
+    await expect(card).toHaveAttribute("data-lit", "true");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(card).not.toHaveAttribute("data-lit");
+    await expect(card).toHaveCSS("transform", "none");
+  } else {
+    await expect(card).not.toHaveAttribute("data-lit");
+  }
+});
