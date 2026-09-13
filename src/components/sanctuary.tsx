@@ -898,11 +898,7 @@ export function Sanctuary() {
                     <BookOpen size={15} /> A MOMENT OF FAITH
                   </span>
                   <h3>
-                    What is God{" "}
-                    <br />
-                    teaching you in
-                    <br />
-                    <em>this season?</em>
+                    What is God teaching you in <em>this season?</em>
                   </h3>
                   <p>Begin with a passage. Leave room to listen.</p>
                   <button
