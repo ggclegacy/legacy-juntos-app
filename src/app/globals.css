@@ -2003,9 +2003,6 @@ th {
   .daily-reflection h3 br {
     display: none;
   }
-  .daily-reflection h3 br:after {
-    content: " ";
-  }
   .daily-reflection h3 em {
     display: block;
   }
@@ -2398,4 +2395,9 @@ th {
   .training-history {
     padding: 14px 12px;
   }
+}
+
+@media (max-width: 850px) {
+  .sidebar { visibility: hidden; }
+  .sidebar.open { visibility: visible; }
 }

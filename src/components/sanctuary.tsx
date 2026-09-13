@@ -898,7 +898,7 @@ export function Sanctuary() {
                     <BookOpen size={15} /> A MOMENT OF FAITH
                   </span>
                   <h3>
-                    What is God
+                    What is God{" "}
                     <br />
                     teaching you in
                     <br />
