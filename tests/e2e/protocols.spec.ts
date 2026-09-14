@@ -114,15 +114,11 @@ test("private protocol, actual use, labs, corrections and review", async ({
   await expect(
     page.getByRole("heading", { name: "Fictional protocol" }),
   ).toBeVisible();
-  if (info.project.name === "mobile") await menu.click();
+  await page
+    .getByRole("button", { name: "Privacy settings", exact: true })
+    .click();
   await page.getByLabel("Sample identity").selectOption({ label: "Kamilla" });
-  if (info.project.name === "mobile") {
-    const scrim = page.getByRole("button", {
-      name: "Close navigation",
-      exact: true,
-    });
-    if (await scrim.isVisible()) await scrim.click();
-  }
+  await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Fictional protocol", exact: true }),
   ).toHaveCount(0);
