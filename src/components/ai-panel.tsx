@@ -1,6 +1,9 @@
 "use client";
-import { useState } from "react";
-import { Sparkles, Lock, Mic, ArrowUp, Copy } from "lucide-react";
+import { useEffect, useReducer, useRef, useState } from "react";
+import { Lock, Mic, ArrowUp, Copy, Square, Pause, Play } from "lucide-react";
+import { ApolloOrb } from "./apollo/orb";
+import { CommandDock, type DockDestination } from "./command-dock";
+import { initialSession, sessionReducer, stateLabels } from "@/lib/apollo/session";
 import { KnowledgeWorkspace } from "./knowledge/workspace";
 import { safeSourceUrl } from "@/lib/ai/knowledge/model";
 import { ApolloRecall } from "./apollo-recall";
@@ -32,7 +35,9 @@ export function AiPanel({
   onClose,
   request,
   onDraft,
+  onNavigate,
 }: {
+  onNavigate: (destination: DockDestination) => void;
   members: Member[];
   userId: string;
   records: LifeRecord[];
@@ -44,6 +49,19 @@ export function AiPanel({
   ) => Promise<Record<string, unknown>>;
   onDraft: (draft: Partial<RecordInput>) => void;
 }) {
+  const [session, dispatch] = useReducer(sessionReducer, initialSession);
+  const [paused, setPaused] = useState(false);
+  const [online, setOnline] = useState(true);
+  const controller = useRef<AbortController | null>(null);
+  const requestEpoch = useRef(0);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const responseRef = useRef<HTMLElement>(null);
+  const currentName = members.find(member => member.user_id === userId)?.display_name ?? "Your";
+  function interrupt() {
+    requestEpoch.current++; controller.current?.abort(); setBusy(false);
+    dispatch({ type: "interrupt" });
+    setNotice("Stopped waiting. The provider may already have processed this request. Reopen a saved conversation before sending again.");
+  }
   const [context, setContext] = useState<"private" | "shared">("private"),
     [mode, setMode] = useState<ApolloMode>("auto");
   const [preferences, setPreferences] = useState<ApolloPreferences>(
@@ -66,6 +84,31 @@ export function AiPanel({
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
   const [conversationTitle, setConversationTitle] = useState("");
   const [hasOlder, setHasOlder] = useState(false);
+  useEffect(() => {
+    const update = () => {
+      setOnline(navigator.onLine);
+      if (!navigator.onLine) {
+        controller.current?.abort(); requestEpoch.current++; setBusy(false);
+        dispatch({ type: "offline" });
+      } else dispatch({ type: "end" });
+    };
+    update(); window.addEventListener("online", update); window.addEventListener("offline", update);
+    const viewport = window.visualViewport;
+    const resize = () => {
+      document.documentElement.style.setProperty("--apollo-height", `${viewport?.height ?? window.innerHeight}px`);
+      document.documentElement.style.setProperty("--apollo-top", `${viewport?.offsetTop ?? 0}px`);
+    };
+    resize(); viewport?.addEventListener("resize", resize); viewport?.addEventListener("scroll", resize);
+    return () => {
+      // Epoch is a mutable request generation, not a DOM reference.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      requestEpoch.current++; controller.current?.abort();
+      window.removeEventListener("online", update); window.removeEventListener("offline", update);
+      viewport?.removeEventListener("resize", resize); viewport?.removeEventListener("scroll", resize);
+      document.documentElement.style.removeProperty("--apollo-height"); document.documentElement.style.removeProperty("--apollo-top");
+    };
+  }, []);
+  useEffect(() => { if (result) responseRef.current?.focus({ preventScroll: false }); }, [result]);
   async function openConversation(c: Conversation) {
     setBusy(true);
     setError("");
@@ -130,6 +173,7 @@ export function AiPanel({
     }
   }
   function resetConversation() {
+    dispatch({ type: "end" });
     setConversation(null);
     setTurns([]);
     setResult("");
@@ -147,11 +191,16 @@ export function AiPanel({
   );
   async function send(e: React.FormEvent) {
     e.preventDefault();
+    if (busy || !consent || demo || !online || !message.trim()) return;
+    const epoch = ++requestEpoch.current;
+    controller.current?.abort(); controller.current = new AbortController();
+    dispatch({ type: "submit" });
     setBusy(true);
     setError("");
     setResult("");
     try {
       const data = await request("/api/ai", {
+        signal: controller.current.signal,
         method: "POST",
         headers: { "x-expected-user": userId },
         body: JSON.stringify({
@@ -171,6 +220,8 @@ export function AiPanel({
             : {}),
         }),
       });
+      if (epoch !== requestEpoch.current) return;
+      dispatch({ type: "complete" });
       setResult(data.text as string);
       setSources((data.sources as MemorySource[]) ?? []);
       if (conversation && data.saved) {
@@ -203,13 +254,15 @@ export function AiPanel({
             " Some older turns were left out of AI context because of length or changed sources.",
         );
     } catch (e) {
+      if (epoch !== requestEpoch.current) return;
+      dispatch({ type: navigator.onLine ? "error" : "offline" });
       setError(e instanceof Error ? e.message : "AI is unavailable.");
     } finally {
-      setBusy(false);
+      if (epoch === requestEpoch.current) setBusy(false);
     }
   }
   return (
-    <Modal title="Apollo" onClose={onClose} wide>
+    <Modal title="Apollo" onClose={onClose} wide immersive>
       {knowledge ? (
         <KnowledgeWorkspace
           request={request}
@@ -232,37 +285,23 @@ export function AiPanel({
           onConversation={openConversation}
         />
       ) : (
-        <div className="ai-panel" aria-busy={busy}>
-          <div className="ai-emblem">
-            <Sparkles size={26} />
-          </div>
-          <button
-            className="secondary"
-            onClick={() => setKnowledge(true)}
-            disabled={busy}
-          >
-            Knowledge & research
-          </button>
-          <p className="lead">
-            Your AI coach, companion, and thinking partner. Faith, strength,
-            wellbeing, and everything you’re building.
-          </p>
-          <div className="apollo-memory-entry">
+        <div className="ai-panel" data-motion-paused={paused} data-composing={!!message} aria-busy={busy}>
+          <div className="apollo-world-tools">
+            <span className="apollo-context-name"><Lock size={12} /> {context === "private" ? `${currentName} · private` : "Juntos · shared sources"}</span>
             <div>
-              <span className="eyebrow">A MEMORY YOU CAN SHAPE</span>
-              <p>Teach Apollo. Return to what matters. Keep growing.</p>
+              <button className="text-button" aria-label="Knowledge & research" disabled={busy} onClick={() => setKnowledge(true)}>Research</button>
+              <button className="text-button" aria-label="Memory & learning" disabled={busy} onClick={() => { setTeaching(""); setLibrary(true); }}>Memory</button>
             </div>
-            <button
-              className="secondary"
-              disabled={busy}
-              onClick={() => {
-                setTeaching("");
-                setLibrary(true);
-              }}
-            >
-              Memory & learning
-            </button>
           </div>
+          <section className="apollo-hero" aria-label="Apollo presence">
+            <ApolloOrb state={online ? session.phase : "offline"} paused={paused} engaged={!!message} />
+            <div className="apollo-presence-copy">
+              <span className="eyebrow">A LITTLE CLARITY. LIMITLESS POSSIBILITY.</span>
+              <h3>Think clearly. <em>Move forward.</em></h3>
+              <p role="status" className="apollo-state"><span />{stateLabels[online ? session.phase : "offline"]}</p>
+            </div>
+            <button className="orb-motion-toggle icon-button" aria-label={paused ? "Resume orb motion" : "Pause orb motion"} aria-pressed={paused} onClick={() => setPaused(!paused)}>{paused ? <Play size={15}/> : <Pause size={15}/>}</button>
+          </section>
           <div className="segmented">
             <button
               disabled={busy}
@@ -301,6 +340,316 @@ export function AiPanel({
                 : "Only Juntos entries can be selected. Results still require your review before being posted."}
             </span>
           </div>
+          <div className="apollo-shortcuts" aria-label="Conversation starters">
+            {(context === "shared" ? [
+              ["Our next chapter", "Help us turn a shared goal into a small next step.", "strategy"],
+              ["Check in together", "Help me prepare a thoughtful relationship check-in, without assuming how my partner feels.", "bridge"],
+              ["Make a memory", "Help me plan a meaningful moment for us.", "creative"],
+            ] : [
+              ["Plan my day", "Help me choose three meaningful priorities for today. Ask what is on my plate first.", "coach"],
+              ["A moment of faith", "Help me slow down for a short devotional and a thoughtful reflection.", "faith"],
+              ["Think bigger", "Help me think through a business idea and find the strongest next step.", "strategy"],
+            ]).map(([label, prompt, nextMode]) => <button key={label} type="button" disabled={busy} onClick={() => { setMessage(prompt); setMode(nextMode as ApolloMode); composer.current?.focus(); }}>{label}<ArrowUp size={12}/></button>)}
+          </div>
+          {turns.length > 0 && (
+            <section
+              className="apollo-transcript"
+              aria-label="Saved conversation history"
+            >
+              <h3>Where we left off</h3>
+              {hasOlder && (
+                <button
+                  className="secondary"
+                  disabled={busy}
+                  onClick={async () => {
+                    if (!conversation) return;
+                    setBusy(true);
+                    try {
+                      const before = Math.min(...turns.map((t) => t.ordinal));
+                      const data = await request(
+                        `/api/ai/memory?type=turns&id=${conversation.id}&before=${before}`,
+                        { headers: { "x-expected-user": userId } },
+                      );
+                      setTurns((old) => [
+                        ...(data.items as ConversationTurn[]).reverse(),
+                        ...old,
+                      ]);
+                      setHasOlder(!!data.hasMore);
+                    } catch (e) {
+                      setError(
+                        e instanceof Error
+                          ? e.message
+                          : "Could not load older turns.",
+                      );
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Load older turns
+                </button>
+              )}
+              {turns.map((t) => (
+                <details key={t.id}>
+                  <summary>{t.user_message.slice(0, 100)}</summary>
+                  <p className="apollo-memory-content">
+                    <strong>You:</strong> {t.user_message}
+                  </p>
+                  <p className="apollo-memory-content">
+                    <strong>Apollo:</strong> {t.assistant_message}
+                  </p>
+                  <small>
+                    Saved {new Date(t.created_at).toLocaleString()} · historical
+                    response; its sources may have changed.
+                  </small>
+                  <button
+                    className="text-button"
+                    disabled={busy}
+                    onClick={() => {
+                      setTeaching(t.user_message);
+                      setLibrary(true);
+                    }}
+                  >
+                    Teach Apollo from this
+                  </button>
+                </details>
+              ))}
+            </section>
+          )}
+          {result && (
+            <section className="ai-result" ref={responseRef} tabIndex={-1} aria-label="Apollo response">
+              <span className="eyebrow">
+                AI-GENERATED · REVIEW IN YOUR OWN WORDS
+              </span>
+              <p>{result}</p>
+              {sources.length > 0 && (
+                <details className="apollo-sources">
+                  <summary>
+                    What Apollo was given · {sources.length} recalled sources
+                  </summary>
+                  <p className="muted">
+                    This is the context supplied, not a guarantee every source
+                    supports every sentence.
+                  </p>
+                  {sources.map((s, i) => (
+                    <details key={`${s.kind}:${s.id}`}>
+                      <summary>
+                        [M{i + 1}] {s.title} · {recallLabels[s.kind]}
+                      </summary>
+                      <small>
+                        {new Date(s.updated_at).toLocaleString()}
+                        {s.details.excerpt ? " · excerpt" : ""}
+                        {s.details.detailsOmitted
+                          ? " · source metadata abbreviated"
+                          : ""}
+                      </small>
+                      <p className="apollo-memory-content">{s.content}</p>
+                      {s.kind === "knowledge" && (
+                        <p className="muted">
+                          {String(s.details.origin ?? "")} ·{" "}
+                          {String(s.details.source_name ?? "")}
+                          {s.details.published_on
+                            ? ` · published ${s.details.published_on}`
+                            : ""}
+                          {s.details.review_on
+                            ? ` · review ${s.details.review_on}`
+                            : ""}
+                        </p>
+                      )}
+                      {Array.isArray(s.details.references) &&
+                        s.details.references
+                          .filter(
+                            (r): r is { url: string; title: string } =>
+                              !!r &&
+                              typeof r.url === "string" &&
+                              typeof r.title === "string" &&
+                              safeSourceUrl(r.url),
+                          )
+                          .map((r, i) => (
+                            <a
+                              className="knowledge-source-link"
+                              key={`${r.url}:${i}`}
+                              href={r.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {r.title}
+                            </a>
+                          ))}
+                    </details>
+                  ))}
+                </details>
+              )}
+              <button
+                className="secondary"
+                onClick={() =>
+                  onDraft({
+                    kind: "journal",
+                    title: "A thought to return to",
+                    body: result,
+                    visibility: "private",
+                  })
+                }
+              >
+                Review & save privately
+              </button>
+            </section>
+          )}
+          <form onSubmit={send} className="apollo-composer">
+            <label>
+              Your starting point
+              <textarea
+                ref={composer}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && (e.metaKey || e.ctrlKey)) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }}
+                required
+                disabled={busy}
+                maxLength={6000}
+                rows={2}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={modeStarters[mode]}
+              />
+            </label>
+            <label className="check-label">
+              <input
+                type="checkbox"
+                disabled={busy}
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+              />
+              Send my message, selected entries, enabled memory sources, and any
+              resumed conversation context to the configured AI provider. Its
+              data policies apply.
+            </label>
+            <div className="ai-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={() =>
+                  setNotice(
+                    "Voice is planned. No microphone is recording. A secure realtime provider connection is needed before voice can start.",
+                  )
+                }
+              >
+                <Mic size={17} /> Voice · soon
+              </button>
+              {busy && <button type="button" className="secondary" onClick={interrupt}><Square size={14}/> Stop response</button>}
+              <button className="primary" disabled={!consent || busy || demo || !online || !message.trim()}>
+                {busy ? "Thinking…" : "Ask Apollo"}
+                <ArrowUp size={17} />
+              </button>
+            </div>
+            <button
+              type="button"
+              className="text-button"
+              disabled={busy || !message.trim()}
+              onClick={() => {
+                setTeaching(message);
+                setLibrary(true);
+              }}
+            >
+              Teach Apollo from this message
+            </button>
+            <details className="apollo-preferences">
+              <summary>
+                Memory & app awareness · {recallSources.length} areas
+              </summary>
+              <p className="muted">
+                Apollo will search these areas for relevant context when you
+                send. Up to 12 sources are selected; this is not an exhaustive
+                review. Your private information never enters Juntos recall.
+              </p>
+              {recallKinds
+                .filter(
+                  (k) =>
+                    context === "private" ||
+                    !["training", "nutrition", "protocol"].includes(k),
+                )
+                .map((k) => (
+                  <label className="check-label" key={k}>
+                    <input
+                      type="checkbox"
+                      checked={recallSources.includes(k)}
+                      disabled={busy}
+                      onChange={(e) => {
+                        setRecallSources((old) =>
+                          e.target.checked
+                            ? [...old, k]
+                            : old.filter((v) => v !== k),
+                        );
+                        setConsent(false);
+                      }}
+                    />
+                    {recallLabels[k]}
+                  </label>
+                ))}
+              <ApolloRecall
+                key={`${context}:${recallSources.join(",")}`}
+                context={context}
+                sources={recallSources}
+                enabled={semanticRecall}
+                onEnabled={(value) => {
+                  setSemanticRecall(value);
+                  setConsent(false);
+                }}
+                request={request}
+                userId={userId}
+                demo={demo}
+                disabled={busy}
+              />
+              <p className="muted">
+                Turn off every area for no cross-conversation recall. Recent
+                turns still accompany a saved conversation.
+              </p>
+            </details>
+            <details>
+              <summary>Choose context · {selected.length} entries</summary>
+              <p className="muted">
+                Selected entries are linked when you create a saved conversation
+                and restored when you reopen it. These entries are sent in
+                addition to any memory areas you enable.
+              </p>
+              {eligible.slice(0, 40).map((r) => (
+                <label className="check-label context-item" key={r.id}>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(r.id)}
+                    disabled={
+                      busy ||
+                      (!selected.includes(r.id) && selected.length >= 12)
+                    }
+                    onChange={(e) =>
+                      setSelected(
+                        e.target.checked
+                          ? [...selected, r.id]
+                          : selected.filter((id) => id !== r.id),
+                      )
+                    }
+                  />
+                  {r.title}
+                </label>
+              ))}
+            </details>
+          </form>
+          {demo && (
+            <p className="muted">
+              Sample workspace · Apollo’s identity and controls are ready. Live
+              responses need a connected account and AI service. The guide below
+              works without AI.
+            </p>
+          )}
+          {notice && (
+            <p role="status" className="privacy-note">
+              {notice}
+            </p>
+          )}
+          {error && (
+            <p role="alert" className="error">
+              {error}
+            </p>
+          )}
+          <details className="apollo-settings">
+            <summary>Personalize Apollo & conversation controls</summary>
           <details className="apollo-preferences">
             <summary>
               {conversation
@@ -448,301 +797,8 @@ export function AiPanel({
               cannot send, schedule, or change a teaching himself.
             </p>
           </details>
-          {turns.length > 0 && (
-            <section
-              className="apollo-transcript"
-              aria-label="Saved conversation history"
-            >
-              <h3>Where we left off</h3>
-              {hasOlder && (
-                <button
-                  className="secondary"
-                  disabled={busy}
-                  onClick={async () => {
-                    if (!conversation) return;
-                    setBusy(true);
-                    try {
-                      const before = Math.min(...turns.map((t) => t.ordinal));
-                      const data = await request(
-                        `/api/ai/memory?type=turns&id=${conversation.id}&before=${before}`,
-                        { headers: { "x-expected-user": userId } },
-                      );
-                      setTurns((old) => [
-                        ...(data.items as ConversationTurn[]).reverse(),
-                        ...old,
-                      ]);
-                      setHasOlder(!!data.hasMore);
-                    } catch (e) {
-                      setError(
-                        e instanceof Error
-                          ? e.message
-                          : "Could not load older turns.",
-                      );
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                >
-                  Load older turns
-                </button>
-              )}
-              {turns.map((t) => (
-                <details key={t.id}>
-                  <summary>{t.user_message.slice(0, 100)}</summary>
-                  <p className="apollo-memory-content">
-                    <strong>You:</strong> {t.user_message}
-                  </p>
-                  <p className="apollo-memory-content">
-                    <strong>Apollo:</strong> {t.assistant_message}
-                  </p>
-                  <small>
-                    Saved {new Date(t.created_at).toLocaleString()} · historical
-                    response; its sources may have changed.
-                  </small>
-                  <button
-                    className="text-button"
-                    disabled={busy}
-                    onClick={() => {
-                      setTeaching(t.user_message);
-                      setLibrary(true);
-                    }}
-                  >
-                    Teach Apollo from this
-                  </button>
-                </details>
-              ))}
-            </section>
-          )}
-          <form onSubmit={send}>
-            <details className="apollo-preferences">
-              <summary>
-                Memory & app awareness · {recallSources.length} areas
-              </summary>
-              <p className="muted">
-                Apollo will search these areas for relevant context when you
-                send. Up to 12 sources are selected; this is not an exhaustive
-                review. Your private information never enters Juntos recall.
-              </p>
-              {recallKinds
-                .filter(
-                  (k) =>
-                    context === "private" ||
-                    !["training", "nutrition", "protocol"].includes(k),
-                )
-                .map((k) => (
-                  <label className="check-label" key={k}>
-                    <input
-                      type="checkbox"
-                      checked={recallSources.includes(k)}
-                      disabled={busy}
-                      onChange={(e) => {
-                        setRecallSources((old) =>
-                          e.target.checked
-                            ? [...old, k]
-                            : old.filter((v) => v !== k),
-                        );
-                        setConsent(false);
-                      }}
-                    />
-                    {recallLabels[k]}
-                  </label>
-                ))}
-              <ApolloRecall
-                key={`${context}:${recallSources.join(",")}`}
-                context={context}
-                sources={recallSources}
-                enabled={semanticRecall}
-                onEnabled={(value) => {
-                  setSemanticRecall(value);
-                  setConsent(false);
-                }}
-                request={request}
-                userId={userId}
-                demo={demo}
-                disabled={busy}
-              />
-              <p className="muted">
-                Turn off every area for no cross-conversation recall. Recent
-                turns still accompany a saved conversation.
-              </p>
-            </details>
-            <label>
-              Your starting point
-              <textarea
-                required
-                disabled={busy}
-                maxLength={6000}
-                rows={4}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={modeStarters[mode]}
-              />
-            </label>
-            <button
-              type="button"
-              className="text-button"
-              disabled={busy || !message.trim()}
-              onClick={() => {
-                setTeaching(message);
-                setLibrary(true);
-              }}
-            >
-              Teach Apollo from this message
-            </button>
-            <details>
-              <summary>Choose context · {selected.length} entries</summary>
-              <p className="muted">
-                Selected entries are linked when you create a saved conversation
-                and restored when you reopen it. These entries are sent in
-                addition to any memory areas you enable.
-              </p>
-              {eligible.slice(0, 40).map((r) => (
-                <label className="check-label context-item" key={r.id}>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(r.id)}
-                    disabled={
-                      busy ||
-                      (!selected.includes(r.id) && selected.length >= 12)
-                    }
-                    onChange={(e) =>
-                      setSelected(
-                        e.target.checked
-                          ? [...selected, r.id]
-                          : selected.filter((id) => id !== r.id),
-                      )
-                    }
-                  />
-                  {r.title}
-                </label>
-              ))}
-            </details>
-            <label className="check-label">
-              <input
-                type="checkbox"
-                disabled={busy}
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-              />
-              Send my message, selected entries, enabled memory sources, and any
-              resumed conversation context to the configured AI provider. Its
-              data policies apply.
-            </label>
-            <div className="ai-actions">
-              <button
-                type="button"
-                className="secondary"
-                onClick={() =>
-                  setNotice(
-                    "Voice is planned. No microphone is recording. A secure realtime provider connection is needed before voice can start.",
-                  )
-                }
-              >
-                <Mic size={17} /> Voice
-              </button>
-              <button className="primary" disabled={!consent || busy || demo}>
-                {busy ? "Thinking…" : "Ask Apollo"}
-                <ArrowUp size={17} />
-              </button>
-            </div>
-          </form>
-          {demo && (
-            <p className="muted">
-              Sample workspace · Apollo’s identity and controls are ready. Live
-              responses need a connected account and AI service. The guide below
-              works without AI.
-            </p>
-          )}
-          {notice && (
-            <p role="status" className="privacy-note">
-              {notice}
-            </p>
-          )}
-          {error && (
-            <p role="alert" className="error">
-              {error}
-            </p>
-          )}
-          {result && (
-            <section className="ai-result">
-              <span className="eyebrow">
-                AI-GENERATED · REVIEW IN YOUR OWN WORDS
-              </span>
-              <p>{result}</p>
-              {sources.length > 0 && (
-                <details className="apollo-sources">
-                  <summary>
-                    What Apollo was given · {sources.length} recalled sources
-                  </summary>
-                  <p className="muted">
-                    This is the context supplied, not a guarantee every source
-                    supports every sentence.
-                  </p>
-                  {sources.map((s, i) => (
-                    <details key={`${s.kind}:${s.id}`}>
-                      <summary>
-                        [M{i + 1}] {s.title} · {recallLabels[s.kind]}
-                      </summary>
-                      <small>
-                        {new Date(s.updated_at).toLocaleString()}
-                        {s.details.excerpt ? " · excerpt" : ""}
-                        {s.details.detailsOmitted
-                          ? " · source metadata abbreviated"
-                          : ""}
-                      </small>
-                      <p className="apollo-memory-content">{s.content}</p>
-                      {s.kind === "knowledge" && (
-                        <p className="muted">
-                          {String(s.details.origin ?? "")} ·{" "}
-                          {String(s.details.source_name ?? "")}
-                          {s.details.published_on
-                            ? ` · published ${s.details.published_on}`
-                            : ""}
-                          {s.details.review_on
-                            ? ` · review ${s.details.review_on}`
-                            : ""}
-                        </p>
-                      )}
-                      {Array.isArray(s.details.references) &&
-                        s.details.references
-                          .filter(
-                            (r): r is { url: string; title: string } =>
-                              !!r &&
-                              typeof r.url === "string" &&
-                              typeof r.title === "string" &&
-                              safeSourceUrl(r.url),
-                          )
-                          .map((r, i) => (
-                            <a
-                              className="knowledge-source-link"
-                              key={`${r.url}:${i}`}
-                              href={r.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {r.title}
-                            </a>
-                          ))}
-                    </details>
-                  ))}
-                </details>
-              )}
-              <button
-                className="secondary"
-                onClick={() =>
-                  onDraft({
-                    kind: "journal",
-                    title: "A thought to return to",
-                    body: result,
-                    visibility: "private",
-                  })
-                }
-              >
-                Review & save privately
-              </button>
-            </section>
-          )}
-          <section className="draft-guide">
+          </details>
+          <details className="draft-guide"><summary>Find my words · a private writing guide</summary>
             <span className="eyebrow">A GUIDED START · NO AI REQUIRED</span>
             <h3>What would you like them to understand?</h3>
             <ol>
@@ -763,9 +819,10 @@ export function AiPanel({
             >
               Open a private draft <Copy size={15} />
             </button>
-          </section>
+          </details>
         </div>
       )}
+      <CommandDock active="apollo" onNavigate={onNavigate} />
     </Modal>
   );
 }

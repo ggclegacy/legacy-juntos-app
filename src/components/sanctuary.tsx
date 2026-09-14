@@ -46,6 +46,7 @@ import {
 import { demoRecords, demoMembers, NEIL, WORKSPACE } from "@/lib/demo";
 import { Editor, Modal, kindLabel } from "./editor";
 import { AiPanel } from "./ai-panel";
+import { CommandDock, type DockDestination } from "./command-dock";
 import { Performance } from "./performance";
 import { Nutrition } from "./nutrition/workspace";
 import { Protocols } from "./protocols";
@@ -345,7 +346,36 @@ export function Sanctuary() {
   const activeDetail = visible.find((r) => r.id === detail);
   const currentName =
     members.find((m) => m.user_id === userId)?.display_name ?? "Friend";
+  useEffect(() => {
+    const restore = () => {
+      const destination = location.hash.slice(1);
+      setAi(destination === "apollo");
+      if (NAV.some(item => item.id === destination)) {
+        setView(destination as View);
+        if (destination === "connect") setScope("shared");
+        if (["personal", "performance", "protocols", "nutrition"].includes(destination)) setScope("private");
+      }
+    };
+    restore();
+    window.addEventListener("popstate", restore);
+    window.addEventListener("hashchange", restore);
+    return () => { window.removeEventListener("popstate", restore); window.removeEventListener("hashchange", restore); };
+  }, []);
+  function openApollo() {
+    if (location.hash !== "#apollo") history.pushState(null, "", "#apollo");
+    setMobileNav(false);
+    setAi(true);
+  }
+  function closeApollo() {
+    history.replaceState(null, "", `#${view}`);
+    setAi(false);
+  }
+  function dockNavigate(destination: DockDestination) {
+    if (destination === "apollo") openApollo();
+    else { if (destination === "connect") setScope("shared"); setAi(false); navigate(destination); }
+  }
   function navigate(next: View) {
+    if (location.hash !== `#${next}`) history.pushState(null, "", `#${next}`);
     setView(next);
     setQuery("");
     setMobileNav(false);
@@ -688,7 +718,7 @@ export function Sanctuary() {
             </div>
           ))}
         </nav>
-        <button className="sidebar-ai" onClick={() => setAi(true)}>
+        <button className="sidebar-ai" onClick={openApollo}>
           <Sparkles size={19} />
           <span>
             Meet Apollo<small>Your coach & thinking partner</small>
@@ -1146,7 +1176,7 @@ export function Sanctuary() {
                     >
                       Another question <RefreshCw size={14} />
                     </button>
-                    <button className="text-button" onClick={() => setAi(true)}>
+                    <button className="text-button" onClick={openApollo}>
                       Help me find my words <Sparkles size={14} />
                     </button>
                   </div>
@@ -1346,14 +1376,7 @@ export function Sanctuary() {
           </footer>
         </main>
       </div>
-      <button
-        className="floating-ai"
-        aria-label="Open Apollo"
-        onClick={() => setAi(true)}
-      >
-        <Sparkles size={20} />
-        <span>Think with Apollo</span>
-      </button>
+      <CommandDock inactive={ai} active={ai ? "apollo" : view} onNavigate={dockNavigate} />
       {notice && (
         <div role="status" className="toast">
           <Check size={17} />
@@ -1371,15 +1394,16 @@ export function Sanctuary() {
       )}
       {ai && (
         <AiPanel
+          onNavigate={dockNavigate}
           members={members}
           key={`${demo}:${workspaceId}:${userId}`}
           userId={userId}
           records={visible}
           demo={demo}
           request={request}
-          onClose={() => setAi(false)}
+          onClose={closeApollo}
           onDraft={(initial) => {
-            setAi(false);
+            closeApollo();
             create("personal", initial);
           }}
         />

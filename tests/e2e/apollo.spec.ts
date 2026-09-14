@@ -9,6 +9,7 @@ test("Apollo identity controls and private/shared clearing", async ({
   await expect(
     page.getByRole("dialog", { name: "Apollo", exact: true }),
   ).toBeVisible();
+  await page.getByText("Personalize Apollo & conversation controls", { exact: true }).click();
   await page.getByLabel("How can Apollo help?").selectOption("fitness");
   await page.getByText("Make this conversation yours", { exact: true }).click();
   await page.getByLabel("Response language").selectOption("pt-BR");

@@ -128,10 +128,11 @@ test("private communication guide never sends or shares automatically", async ({
   await expect(
     page.getByRole("button", { name: "Ask Apollo", exact: true }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Voice", exact: true }).click();
+  await page.getByRole("button", { name: "Voice · soon", exact: true }).click();
   await expect(
     page.getByText("Voice is planned.", { exact: false }),
   ).toBeVisible();
+  await page.getByText("Find my words · a private writing guide", { exact: true }).click();
   await page.getByRole("button", { name: "Open a private draft" }).click();
   await expect(page.getByLabel("Your words")).toContainText(
     "I would like to clarify our plans.",

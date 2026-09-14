@@ -9,6 +9,7 @@ import "./training.css";
 import "./protocols.css";
 import "./nutrition.css";
 import "./studio.css";
+import "./apollo.css";
 export const metadata: Metadata = {
   title: "Legacy Juntos · Life, together",
   description: "Two lives. Growing individually. Building together.",
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#080a09",
 };
 export default function Layout({ children }: { children: React.ReactNode }) {

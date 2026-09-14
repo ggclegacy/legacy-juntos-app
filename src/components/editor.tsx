@@ -36,11 +36,13 @@ export function Modal({
   onClose,
   children,
   wide = false,
+  immersive = false,
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
   wide?: boolean;
+  immersive?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -52,7 +54,7 @@ export function Modal({
     <dialog
       aria-label={title}
       ref={ref}
-      className={`modal ${wide ? "wide" : ""}`}
+      className={`modal ${wide ? "wide" : ""} ${immersive ? "apollo-world" : ""}`}
       onCancel={onClose}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -60,7 +62,7 @@ export function Modal({
     >
       <header>
         <div>
-          <span className="eyebrow">YOUR SPACE, YOUR CHOICE</span>
+          <span className="eyebrow">{immersive ? "LEGACY JUNTOS / INTELLIGENCE" : "YOUR SPACE, YOUR CHOICE"}</span>
           <h2>{title}</h2>
         </div>
         <button className="icon-button" onClick={onClose} aria-label="Close">

@@ -1,0 +1,203 @@
+/* Apollo shares the sanctuary palette. Its energy is exclusively gold and green. */
+:root { --dock-clearance: calc(112px + env(safe-area-inset-bottom, 0px)); }
+body:has(.command-dock) main { padding-bottom: var(--dock-clearance); }
+.command-dock { position: fixed; z-index: 32; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 580px); display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); align-items: end; padding: 8px 12px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--surface-1); border: 1px solid var(--border-premium); border-bottom: 0; border-radius: 25px 25px 0 0; box-shadow: 0 -12px 40px var(--shadow-color); }
+.command-dock button { appearance: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 57px; min-width: 44px; border: 0; background: none; color: var(--text-muted); font-size: 10px; font-weight: 600; letter-spacing: .035em; cursor: pointer; padding: 6px 2px; border-radius: 10px; }
+.command-dock button[aria-current], .command-dock button:hover { color: var(--gold-bright); }
+.command-dock button[aria-current] > svg { filter: drop-shadow(0 0 7px var(--gold-edge)); }
+.command-dock .dock-apollo { color: var(--gold-primary); margin-top: -31px; }
+.dock-core { width: 62px; height: 62px; padding: 5px; border: 1px solid var(--gold-edge); border-radius: 50%; background: var(--background-base); box-shadow: 0 0 0 6px var(--surface-1), 0 0 22px var(--gold-glow); }
+.dock-core > span { display: block; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(ellipse at 27% 20%, var(--gold-bright), transparent 12%), radial-gradient(ellipse at 78% 70%, var(--emerald-primary), transparent 58%), radial-gradient(ellipse at 20% 20%, var(--gold-muted), var(--background-base) 62%); box-shadow: inset 0 0 0 1px var(--gold-edge), inset -4px -5px 10px var(--emerald-primary); animation: apollo-breathe 7s ease-in-out infinite; }
+@keyframes apollo-breathe { 50% { box-shadow: inset 0 0 0 1px var(--gold-primary), inset -6px -7px 15px var(--emerald-primary), 0 0 14px var(--gold-glow); } }
+.modal.apollo-world { position: fixed; inset: var(--apollo-top, 0px) 0 auto; margin: 0; width: 100%; max-width: 100%; height: var(--apollo-height, 100dvh); max-height: none; border: 0; border-radius: 0; background: var(--background-base); overflow-x: hidden; overscroll-behavior: contain; animation: apollo-arrive .45s cubic-bezier(.2,.7,.2,1) both; scroll-padding-top: 98px; scroll-padding-bottom: var(--dock-clearance); }
+@keyframes apollo-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.apollo-world > header { padding: calc(17px + env(safe-area-inset-top, 0px)) max(24px, calc((100% - 1120px)/2)) 17px; background: var(--background-base); border-color: var(--border-subtle); z-index: 4; }
+.apollo-world > header h2 { font: 500 24px var(--sans); letter-spacing: .13em; text-transform: uppercase; margin-top: 5px; }
+.apollo-world > header .eyebrow { color: var(--gold-primary); letter-spacing: .2em; }
+.apollo-world .ai-panel { max-width: 850px; margin: 0 auto; padding: 20px 30px calc(var(--dock-clearance) + 28px); }
+.apollo-world .icon-button { min-width: 44px; min-height: 44px; }
+.apollo-world-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.apollo-world-tools > div { display: flex; gap: 18px; }
+.apollo-world-tools .text-button { font-size: 11px; min-height: 44px; padding: 0; }
+.apollo-context-name { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-secondary); }
+.apollo-hero { position: relative; display: grid; justify-items: center; padding-bottom: 22px; }
+.apollo-orb { position: relative; width: clamp(220px, 36vh, 390px); max-width: 90%; aspect-ratio: 1; isolation: isolate; }
+.apollo-orb canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .8s; }
+.apollo-orb canvas[data-ready] { opacity: 1; }
+.orb-fallback { position: absolute; inset: 16%; border-radius: 50%; background: radial-gradient(ellipse at 24% 18%, var(--gold-bright), transparent 13%), radial-gradient(ellipse at 85% 62%, var(--emerald-primary), transparent 57%), radial-gradient(ellipse at 30% 18%, var(--gold-muted), var(--background-base) 65%); box-shadow: inset 1px 2px 3px var(--gold-primary), inset -2px -3px 14px var(--emerald-primary), 0 0 28px var(--gold-glow); }
+.apollo-presence-copy { text-align: center; margin-top: -9px; }
+.apollo-presence-copy .eyebrow { font-size: 9px; letter-spacing: .23em; color: var(--gold-muted); }
+.apollo-presence-copy h3 { font: 500 clamp(32px,4.5vw,48px)/1.1 var(--serif); margin: 12px 0; letter-spacing: -.025em; }
+.apollo-presence-copy h3 em { color: var(--gold-primary); font-weight: 500; }
+.apollo-state { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-secondary); font-size: 11px; min-height: 20px; margin: 0; }
+.apollo-state > span { width: 5px; height: 5px; background: var(--gold-primary); border-radius: 50%; }
+.orb-motion-toggle { position: absolute; right: 10%; top: 40%; color: var(--text-muted); }
+.apollo-world .ai-panel > .segmented { margin: 0 auto 10px; width: fit-content; max-width: 100%; border: 1px solid var(--border-subtle); border-radius: 30px; padding: 4px; background: var(--surface-1); }
+.apollo-world .ai-panel > .segmented button { min-height: 40px; padding: 8px 22px; border-radius: 25px; font-size: 11px; }
+.apollo-world .privacy-note { font-size: 10px; line-height: 1.6; justify-content: center; margin: 10px 0 18px; color: var(--text-muted); }
+.apollo-shortcuts { display: flex; justify-content: center; gap: 8px; margin: 19px 0; flex-wrap: wrap; }
+.apollo-shortcuts button { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 1px solid var(--border-subtle); border-radius: 25px; background: transparent; padding: 9px 17px; color: var(--text-secondary); font-size: 11px; cursor: pointer; }
+.apollo-shortcuts button:hover { border-color: var(--gold-edge); color: var(--gold-bright); }
+.apollo-world .ai-panel details { background: transparent; border: 0; border-bottom: 1px solid var(--border-subtle); border-radius: 0; padding: 10px 0; }
+.apollo-world .ai-panel summary { min-height: 28px; align-content: center; font-size: 11px; color: var(--text-secondary); }
+.apollo-settings[open] { padding: 15px 18px !important; background: var(--surface-1) !important; }
+.apollo-composer { margin-top: 12px; }
+.apollo-world .apollo-composer textarea { min-height: 86px; max-height: 240px; resize: vertical; border: 1px solid var(--border-control); border-radius: 16px; background: var(--surface-1); padding: 17px 18px; font-size: 16px; line-height: 1.55; scroll-margin-top: 100px; }
+.apollo-world .apollo-composer > label { margin: 13px 0; font-size: 11px; }
+.apollo-world .apollo-composer > .check-label { font-size: 10px; line-height: 1.55; margin: 15px 0; align-items: start; }
+.apollo-world input[type=checkbox] { min-width: 20px; min-height: 20px; accent-color: var(--gold-primary); }
+.apollo-world .ai-actions { justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.apollo-world button.primary, .apollo-world button.secondary { min-height: 44px; border-radius: 24px; }
+.apollo-world .ai-result { background: transparent; padding: 24px 0; border: 0; border-top: 1px solid var(--gold-edge); box-shadow: none; scroll-margin-top: 112px; }
+.apollo-world .ai-result > p { font-size: 15px; line-height: 1.85; white-space: pre-wrap; }
+.apollo-world .draft-guide { margin-top: 20px; }
+.apollo-world > :not(header):not(.ai-panel):not(.command-dock) { padding-bottom: var(--dock-clearance); }
+.apollo-world .command-dock { position: sticky; left: auto; transform: none; margin: calc(-1 * var(--dock-clearance)) auto 0; bottom: 0; }
+body:has(.apollo-world[open]) { overflow: hidden; }
+.apollo-world button:focus-visible, .command-dock button:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+@media(min-width: 1100px) { body:not(:has(.apollo-world[open])) > * .command-dock { left: calc(50% + 115px); } }
+@media(max-width: 600px) {
+ .apollo-world > header { padding-left: 20px; padding-right: 20px; }
+ .apollo-world .ai-panel { padding: 8px 20px calc(var(--dock-clearance) + 25px); }
+ .apollo-world-tools { gap: 2px; flex-wrap: wrap; justify-content: center; }
+ .apollo-world-tools > div { gap: 20px; }
+ .apollo-context-name { width: 100%; justify-content: center; padding-top: 10px; }
+ .apollo-orb { width: clamp(190px, 32vh, 300px); }
+ .apollo-presence-copy h3 { font-size: 35px; }
+ .apollo-shortcuts { gap: 6px; }
+ .apollo-shortcuts button { padding: 8px 12px; font-size: 10px; gap: 5px; }
+ .orb-motion-toggle { right: 0; }
+ .apollo-world .ai-panel > .segmented button { padding: 8px 18px; }
+ .apollo-world .privacy-note { font-size: 10px; }
+ .command-dock { border-radius: 22px 22px 0 0; }
+}
+@media(max-height: 540px) { .apollo-world:has(textarea:focus) .apollo-hero { display: none; } .apollo-world:has(textarea:focus) .apollo-shortcuts { display: none; } }
+@media(prefers-reduced-motion: reduce) { .apollo-world, .dock-core > span { animation: none; } .apollo-orb canvas { transition: none; } }
+/* Keep the invitation and composer visible before advanced controls. */
+.apollo-orb { width: clamp(220px, 30vh, 300px); }
+.apollo-presence-copy { margin-top: 0; position: relative; }
+.apollo-world .ai-panel > .segmented { width: 290px; }
+.apollo-world .ai-panel > .segmented button { white-space: nowrap; }
+.apollo-world .privacy-note { border: 0; background: transparent; padding: 0; box-shadow: none; }
+.apollo-world .apollo-composer > .text-button { font-size: 10px; }
+.apollo-world .ai-panel details { margin-bottom: 6px; }
+.apollo-world .ai-panel > .segmented + .privacy-note { margin-bottom: 8px; }
+.apollo-hero { padding-bottom: 16px; }
+.apollo-shortcuts { margin: 12px 0 16px; }
+@media(max-width: 600px) {
+ .apollo-orb { width: clamp(175px, 27vh, 245px); }
+ .apollo-presence-copy h3 { font-size: 32px; }
+ .apollo-world .ai-panel > .segmented + .privacy-note { max-width: 300px; margin-left: auto; margin-right: auto; }
+ .apollo-world .ai-panel > .segmented + .privacy-note svg { flex-shrink: 0; }
+}
+
+@media(max-width:600px) {
+ .apollo-world > header { padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: 12px; }
+ .apollo-orb { width: clamp(175px, 25vh, 210px); }
+ .apollo-context-name { padding-top: 4px; }
+}
+
+main .training-save, main .nutrition-save { bottom: var(--dock-clearance); }
+
+/* Apollo presence II — luminous Brazilian green, champagne gold, deep dimensional space. */
+.apollo-world {
+ --apollo-green: #21db78;
+ --apollo-gold: #f4cc76;
+ --apollo-gold-light: #ffe8ab;
+ --apollo-ink: #081510;
+ background: radial-gradient(ellipse at 80% 28%, #125a354f, transparent 57%), radial-gradient(ellipse at 14% 12%, #9f6a2430, transparent 49%), linear-gradient(150deg, #12231a, #08110d 65%, #182317) !important;
+}
+.apollo-world > header {
+ background: #0c1c15f5;
+ border-bottom-color: #dbb76640;
+ box-shadow: 0 10px 45px #04140e40;
+}
+.apollo-world > header h2 { color: var(--apollo-gold-light); font-size: 22px; letter-spacing: .2em; }
+.apollo-world > header .eyebrow { color: var(--apollo-gold); }
+.apollo-world .ai-panel { max-width: 880px; }
+.apollo-world .apollo-context-name { color: #cae4d3; }
+.apollo-world .apollo-context-name svg { color: var(--apollo-green); }
+.apollo-world-tools .text-button { color: var(--apollo-gold); }
+.apollo-world .apollo-hero { padding-top: 0; isolation: isolate; }
+.apollo-hero::before {
+ content: ""; position: absolute; z-index: -1; pointer-events: none;
+ width: min(650px, 125%); height: 100%; top: -9%;
+ background: radial-gradient(ellipse at 36% 47%, #eaba4b26, transparent 49%), radial-gradient(ellipse at 68% 46%, #1fe27638, transparent 54%);
+ animation: apollo-atmosphere 6s ease-in-out infinite;
+}
+@keyframes apollo-atmosphere { 0%,100% { opacity: .6; transform: scale(.95); } 50% { opacity: 1; transform: scale(1.06); } }
+.apollo-world .apollo-orb { width: clamp(280px, 38vh, 370px); max-width: 100%; }
+.apollo-orb canvas { z-index: 1; }
+.apollo-orb:has(canvas[data-ready]) .orb-fallback { opacity: 0; }
+.apollo-world .orb-fallback {
+ inset: 18%; background: radial-gradient(ellipse at 25% 18%, #fff4c5, transparent 18%), conic-gradient(from 30deg, #073522, #18c866, #062a19, #f6c660, #866016, #073522);
+ box-shadow: inset 0 0 24px #ffe2a58f, 0 0 36px #eac35555, 15px 0 60px #24d97c55;
+ animation: apollo-fallback-breathe 6s ease-in-out infinite;
+}
+@keyframes apollo-fallback-breathe { 50% { transform: scale(1.06); } }
+.apollo-presence-copy .eyebrow { color: var(--apollo-gold); font-size: 9px; letter-spacing: .19em; }
+.apollo-presence-copy h3 { font: 500 clamp(28px, 3.3vw, 40px)/1.25 var(--sans); letter-spacing: -.045em; margin: 12px 0 14px; color: #f3f3df; }
+.apollo-presence-copy h3 em { font-style: normal; color: var(--apollo-gold-light); }
+.apollo-state { color: #cce5d5; font-size: 12px; }
+.apollo-state > span { width: 6px; height: 6px; background: var(--apollo-green); box-shadow: 0 0 12px #21db7880; }
+.apollo-world .orb-motion-toggle { border: 1px solid #cdb37335; border-radius: 50%; background: #15322280; color: var(--apollo-gold); right: 13%; }
+.apollo-world .ai-panel > .segmented { background: #10271b; border-color: #a5cb9f45; }
+.apollo-world .ai-panel > .segmented button { color: #cfe2cf; }
+.apollo-world .ai-panel > .segmented button[aria-pressed=true] { background: linear-gradient(120deg, #225c3b, #16412c); color: #ffe6a5; border-color: #dfc07c; box-shadow: inset 0 1px #ffe6a522; }
+.apollo-world .privacy-note { color: #b4c9ba; font-size: 11px; }
+.apollo-world .apollo-shortcuts button { background: #18332488; border-color: #81bf8b4a; color: #e3ebd6; font-size: 12px; }
+.apollo-world .apollo-shortcuts svg { color: var(--apollo-gold); }
+.apollo-world .apollo-shortcuts button:hover { background: #214631; border-color: #efc875; }
+.apollo-world .apollo-composer {
+ border: 1px solid #bd9f5955; border-radius: 23px; padding: 16px 20px;
+ background: linear-gradient(130deg, #1d3729e8, #10281de8 65%, #293925b0);
+ box-shadow: 0 16px 60px #030d0855, inset 0 1px #ffe5a51a;
+ transition: border-color .25s, box-shadow .25s;
+}
+.apollo-world .apollo-composer:focus-within { border-color: #e9c276; box-shadow: 0 0 0 3px #edc66e12, 0 15px 60px #083d242e; }
+.apollo-world .apollo-composer > label:first-child { color: var(--apollo-gold); margin-top: 0; font-size: 11px; }
+.apollo-world .apollo-composer textarea { background: transparent; border: 0; border-radius: 10px; min-height: 66px; padding: 10px 0; color: #f1f5e7; box-shadow: none; }
+.apollo-world .apollo-composer textarea::placeholder { color: #b5cdbd; }
+.apollo-world .apollo-composer textarea:focus { outline-offset: 5px; outline-color: #f4cc7666; }
+.apollo-world .apollo-composer > .check-label { color: #bfd3c5; font-size: 11px; }
+.apollo-world .ai-actions { margin: 12px 0 15px; }
+.apollo-world .ai-actions .primary { background: linear-gradient(115deg, #ffebad, #e9bd65); color: #142316; border-color: #ffe5a5; box-shadow: 0 4px 24px #f4cc7622; padding-left: 23px; padding-right: 23px; }
+.apollo-world .ai-actions .secondary { background: #1b452d; color: #d9f0de; border-color: #80c49260; }
+.apollo-world .ai-panel details { border-bottom-color: #aac39b30; }
+.apollo-world .ai-panel summary { color: #c4d6c6; min-height: 34px; }
+.apollo-world .ai-result { padding: 22px 24px; border-left: 2px solid var(--apollo-gold); background: #193b284d; border-top: 0; border-radius: 0 18px 18px 0; }
+.apollo-world .command-dock { background: #10251b; border-color: #e7c57966; box-shadow: 0 -12px 50px #0e2c1d66; }
+.apollo-world .dock-core { background: #0a2317; box-shadow: 0 0 0 6px #10251b, 0 0 24px #efd28135; }
+.apollo-world .dock-core > span { background: radial-gradient(ellipse at 27% 20%, #ffe6a5, transparent 23%), conic-gradient(from 30deg, #0c4029, #28ce79, #0f3220, #ebc570, #775c29, #0c4029); }
+.apollo-world .command-dock button { color: #b9d0c0; }
+.apollo-world .command-dock button[aria-current], .apollo-world .command-dock .dock-apollo { color: #ffe3a0; }
+.apollo-world .ai-panel[data-composing=true] .apollo-state > span { background: var(--apollo-gold-light); }
+.apollo-world .ai-panel[data-motion-paused=true] .apollo-hero::before,
+.apollo-world .apollo-orb[data-paused=true] .orb-fallback { animation-play-state: paused; }
+@media(max-width:600px) {
+ .apollo-world .ai-panel { padding-left: 18px; padding-right: 18px; }
+ .apollo-world .apollo-orb { width: clamp(245px, 32vh, 290px); }
+ .apollo-world .apollo-hero { padding-bottom: 14px; }
+ .apollo-world .orb-motion-toggle { right: 0; }
+ .apollo-presence-copy h3 { font-size: 27px; letter-spacing: -.04em; }
+ .apollo-presence-copy h3 em { display: block; }
+ .apollo-presence-copy .eyebrow { font-size: 8px; }
+ .apollo-world .apollo-shortcuts button { font-size: 11px; padding: 8px 11px; }
+ .apollo-world .apollo-composer { padding: 15px; }
+ .apollo-world .apollo-composer > .check-label { font-size: 10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .apollo-hero::before, .apollo-world .orb-fallback { animation: none; }
+ .apollo-world .apollo-composer { transition: none; }
+}
+
+@media(max-width:600px) {
+ .apollo-world .apollo-world-tools { flex-wrap: nowrap; justify-content: space-between; gap: 12px; }
+ .apollo-world .apollo-world-tools > div { gap: 18px; }
+ .apollo-world .apollo-context-name { width: auto; justify-content: start; padding-top: 0; }
+ .apollo-world .apollo-orb { width: clamp(220px, 28vh, 245px); }
+ .apollo-world .apollo-presence-copy h3 { font-size: 22px; margin: 10px 0; }
+ .apollo-world .apollo-presence-copy h3 em { display: inline; }
+ .apollo-world .ai-panel > .segmented + .privacy-note { margin-top: 7px; margin-bottom: 7px; }
+ .apollo-world .apollo-shortcuts { margin: 8px 0 12px; }
+}
