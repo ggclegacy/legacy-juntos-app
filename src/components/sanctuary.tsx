@@ -47,15 +47,17 @@ import { demoRecords, demoMembers, NEIL, WORKSPACE } from "@/lib/demo";
 import { Editor, Modal, kindLabel } from "./editor";
 import { AiPanel } from "./ai-panel";
 import { Performance } from "./performance";
+import { Nutrition } from "./nutrition/workspace";
 import { Protocols } from "./protocols";
 import { useMaterialMotion } from "./material-motion";
 
-type View = "home" | "protocols" | Domain;
+type View = "home" | "protocols" | "nutrition" | Domain;
 const NAV: { id: View; label: string; icon: LucideIcon; group?: string }[] = [
   { id: "home", label: "Our space", icon: Home },
   { id: "personal", label: "My life", icon: Compass },
   { id: "faith", label: "Faith", icon: BookOpen, group: "GROW" },
   { id: "performance", label: "Performance", icon: Dumbbell },
+  { id: "nutrition", label: "Macros", icon: Sparkles },
   { id: "protocols", label: "Protocols", icon: ShieldCheck },
   { id: "connect", label: "Know & connect", icon: HeartHandshake },
   {
@@ -346,7 +348,12 @@ export function Sanctuary() {
     setView(next);
     setQuery("");
     setMobileNav(false);
-    if (next === "personal" || next === "performance" || next === "protocols")
+    if (
+      next === "personal" ||
+      next === "performance" ||
+      next === "protocols" ||
+      next === "nutrition"
+    )
       setScope("private");
   }
   function create(domain: Domain, initial?: Partial<RecordInput>) {
@@ -770,7 +777,9 @@ export function Sanctuary() {
             className="page-controls"
             style={{
               display:
-                view === "performance" || view === "protocols"
+                view === "performance" ||
+                view === "protocols" ||
+                view === "nutrition"
                   ? "none"
                   : undefined,
             }}
@@ -805,7 +814,11 @@ export function Sanctuary() {
                 className="primary small"
                 onClick={() =>
                   create(
-                    view === "home" || view === "protocols" ? "personal" : view,
+                    view === "home" ||
+                      view === "protocols" ||
+                      view === "nutrition"
+                      ? "personal"
+                      : view,
                   )
                 }
               >
@@ -839,7 +852,14 @@ export function Sanctuary() {
               request={request}
             />
           </div>
-          {view === "protocols" ? (
+          {view === "nutrition" ? (
+            <Nutrition
+              key={`${demo}:${workspaceId}:${userId}`}
+              userId={userId}
+              demo={demo}
+              request={request}
+            />
+          ) : view === "protocols" ? (
             <Protocols
               key={`${demo}:${workspaceId}:${userId}`}
               userId={userId}

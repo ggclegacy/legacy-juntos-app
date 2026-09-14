@@ -378,3 +378,63 @@ describe("private report storage policies", () => {
     );
   });
 });
+
+describe("nutrition privacy, revisions and day identity", () => {
+  it("isolates active partners and forbids rewriting history or spoofing ownership", async () => {
+    await db.exec("reset role");
+    await db.exec(
+      readFileSync("supabase/migrations/005_nutrition.sql", "utf8"),
+    );
+    await db.query("update memberships set active=true where user_id=$1", [k]);
+    const entity = "00000000-0000-4000-8000-000000000099";
+    await as(n);
+    await db.query(
+      `insert into nutrition_events(id,entity_id,owner_id,workspace_id,revision,payload) values($1,$1,$2,$3,1,'{"kind":"day","date":"2026-09-13"}')`,
+      [entity, n, w],
+    );
+    await as(k);
+    expect(
+      (await db.query("select * from nutrition_events")).rows,
+    ).toHaveLength(0);
+    await expect(
+      db.query(
+        `insert into nutrition_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),gen_random_uuid(),$1,$2,1,'{"kind":"food"}')`,
+        [n, w],
+      ),
+    ).rejects.toThrow(/row-level security/);
+    await as(n);
+    await expect(db.exec("delete from nutrition_events")).rejects.toThrow(
+      /permission denied/,
+    );
+    await expect(
+      db.exec(`update nutrition_events set payload='{}'`),
+    ).rejects.toThrow(/permission denied/);
+    await expect(
+      db.query(
+        `insert into nutrition_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),gen_random_uuid(),$1,$2,1,'{"kind":"day","date":"2026-09-13"}')`,
+        [n, w],
+      ),
+    ).rejects.toThrow(/unique/);
+    await expect(
+      db.query(
+        `insert into nutrition_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),$1,$2,$3,2,'{"kind":"day","date":"2026-09-14"}')`,
+        [entity, n, w],
+      ),
+    ).rejects.toThrow(/date cannot change/);
+    await db.query(
+      `insert into nutrition_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),$1,$2,$3,2,'{"kind":"day","date":"2026-09-13"}')`,
+      [entity, n, w],
+    );
+    expect(
+      (await db.query("select * from nutrition_events")).rows,
+    ).toHaveLength(2);
+    await db.exec("reset role");
+    await db.query("update memberships set active=false where user_id=$1", [n]);
+    await as(n);
+    expect(
+      (await db.query("select * from nutrition_events")).rows,
+    ).toHaveLength(0);
+    await db.exec("reset role");
+    await db.query("update memberships set active=true where user_id=$1", [n]);
+  });
+});

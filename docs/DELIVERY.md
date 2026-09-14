@@ -55,3 +55,9 @@ The hosted Supabase Auth/REST boundary, real provider response quality, real-dev
 ## How to use the current version
 
 From the Desktop project, run `npm ci` if dependencies are missing, then `npm run dev`. Open http://localhost:3000. Use the sample workspace to explore the product. Follow `README.md` to connect real accounts and persistence. Do not treat the sample workspace as durable storage for real private information.
+
+## Nutrition / Macros workspace — September 13, 2026
+
+Added private meal/food/recipe/target/day history, coach-controlled effective targets, eaten/planned logging, recipe portion snapshots, daily water/completeness, food reuse and portion ideas, seven-day diary/export, and the premium responsive Macros interface. Photo, text and label analysis have authenticated provider routes; barcode capture has a lazy camera scanner and exact product lookup. See `nutrition.md` for credential requirements and explicit feature limits, and `nutrition-research.md` for the source-backed design.
+
+Verification: 73 unit/API/PostgreSQL checks, lint, TypeScript and production build; desktop/mobile browser flows cover targets, manual food entry, decimal commas, weighed amounts, planned/eaten separation, invalid-save draft preservation, recipes, reload and sample identity isolation. Live provider accuracy, real-camera decoding and hosted two-user auth still need credential/device validation.

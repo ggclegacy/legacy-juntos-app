@@ -70,7 +70,7 @@ On a machine with Chrome already installed, `CHROME_PATH` may point to its execu
 
 - Configure a hosted database/auth project, email delivery, verified users, secure recovery, production HTTPS, backups and tested restores. Run the two-account release checks against that environment before storing real sensitive data.
 - Implement private media uploads with signed URLs, source authorization and deletion/revocation. Current Memories and prep check-ins are text; no photo/voice-note storage is connected.
-- Extend training to reusable programs, richer progressive overload history and coach-directed reviews; nutrition/supplement tracking is currently free-form notes, not a prescriptive engine.
+- Extend training to reusable programs, richer progressive overload history and coach-directed reviews; structured nutrition and protocol tracking are documented below; neither is a prescriptive engine.
 - Add recurring scheduling/calendar/reminders, push opt-ins, Portuguese localization, licensed Bible content and multi-session study plans. Current prompts rotate manually rather than infer relationship state.
 - Add robust realtime collaboration, simultaneous shared AI facilitation, consented voice and reviewed image workflows. There are no autonomous messages, outreach or social publishing actions.
 - Audience changes for records with linked children are blocked, preventing orphaned leaks. A future transactional sharing UI can explicitly review and update the whole subtree. Owners can remove their own linked entries; an owner cannot delete someone else's reply. Leaving/deleting a workspace needs a separately reviewed administrative flow.
@@ -94,3 +94,7 @@ Current limits: programs repeat a rotating sequence for a selected cycle count; 
 ## Protocol workspace
 
 The **Protocols** navigation includes private protocol history, actual-use logs, manual bloodwork, collection-date context, original-report storage, and appointment review. See [Protocol setup and limitations](docs/protocols.md) and the [research blueprint](docs/protocol-research.md). Connected mode needs migrations 003–004; health AI additionally requires explicit provider configuration. Sample mode must contain fictional information only.
+
+## Macro workspace
+
+**Macros** now includes a private daily diary, coach-set training/rest targets, planned and eaten meals, food library, weighed batch recipes, barcode capture, photo/text/label draft entry, water counter and seven-day history. Manual/sample flows work immediately. Connected storage needs migration 005, database search needs `USDA_API_KEY`, and photo/text/label AI needs configured image-capable OpenAI credentials plus `NUTRITION_AI_ENABLED=true`. See [Nutrition setup and limitations](docs/nutrition.md) and [nutrition research](docs/nutrition-research.md). Photo estimates always require review; targets never change automatically.
