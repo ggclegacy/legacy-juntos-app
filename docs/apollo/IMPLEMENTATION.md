@@ -1,5 +1,7 @@
 # Apollo identity release
 
+This records the initial identity release. The subsequent [memory release](MEMORY-IMPLEMENTATION.md) supersedes the no-memory capability statements below.
+
 Apollo's identity is defined in `src/lib/ai/apollo-instructions.ts`, versioned by `APOLLO_VERSION` in `src/lib/ai/apollo.ts`. The research supporting all ten principles is in `RESEARCH.md`. Identity is server-owned guidance, not model retraining or a guarantee of behavior.
 
 ## What is connected

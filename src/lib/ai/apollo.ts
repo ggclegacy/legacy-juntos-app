@@ -1,5 +1,6 @@
 import { z } from "zod";
-export const APOLLO_VERSION = "2026-09-13.1";
+import { recallKinds } from "./memory";
+export const APOLLO_VERSION = "2026-09-13.2";
 export const apolloModes = [
   "auto",
   "companion",
@@ -69,9 +70,13 @@ export const apolloRequestSchema = z
         "Select each entry only once.",
       ),
     consent: z.literal(true),
+    recallSources: z.array(z.enum(recallKinds)).max(6).default([]),
+    conversationId: z.uuid().optional(),
+    conversationRevision: z.number().int().nonnegative().optional(),
     preferences: apolloPreferencesSchema.default(defaultApolloPreferences),
   })
-  .strict();
+  .strict()
+  .refine((v) => !!v.conversationId === (v.conversationRevision !== undefined));
 export const apolloPrinciples = [
   ["Purpose", "Help you grow individually and build together, on your terms."],
   [

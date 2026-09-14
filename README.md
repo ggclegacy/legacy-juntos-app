@@ -101,4 +101,11 @@ The **Protocols** navigation includes private protocol history, actual-use logs,
 
 ## Apollo identity
 
-Apollo now has a versioned identity shared by the main assistant and specialized AI operations, ten help roles, and per-panel controls for approach, tone, depth and language. See [the ten-principle research](docs/apollo/RESEARCH.md) and [implementation / behavioral evaluation](docs/apollo/IMPLEMENTATION.md). The server owns instructions and preserves selected-record privacy. This is the identity layer; a full subject knowledge library, durable chat memory and autonomous actions remain separate work. Live-model evaluations use synthetic scenarios and are opt-in.
+Apollo now has a versioned identity shared by the main assistant and specialized AI operations, ten help roles, and per-panel controls for approach, tone, depth and language. See [the ten-principle research](docs/apollo/RESEARCH.md) and [implementation / behavioral evaluation](docs/apollo/IMPLEMENTATION.md). The server owns instructions and preserves selected-record privacy. Durable chat memory and explicit user teaching now extend this identity; curated subject libraries and autonomous actions remain separate work. Live-model evaluations use synthetic scenarios and are opt-in.
+
+
+## Apollo memory & learning
+
+Open **Apollo → Memory & learning** to teach, search, correct, retire, or delete knowledge and reopen saved conversations. Choose private, named-recipient, or Juntos visibility for each teaching. Start a saved conversation to preserve successful turns; temporary chat remains available. Recall areas independently enable teachings, past conversations, life/projects, and private training/nutrition/protocol data. The answer includes a dated receipt of recalled context.
+
+Connected memory requires migration **006_apollo_memory.sql** after the existing migrations. Teaching needs connected authentication/storage; AI replies also need the existing server credentials. No new provider or environment variable is required. The sample preview explicitly keeps teachings only for the current library visit. See [memory research](docs/apollo/MEMORY-RESEARCH.md) and [setup, exact behavior and limits](docs/apollo/MEMORY-IMPLEMENTATION.md). Recall is currently lexical and selective, not perfect recall, semantic search, model retraining, or autonomous fact extraction.

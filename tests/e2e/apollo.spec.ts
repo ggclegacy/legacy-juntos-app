@@ -19,7 +19,7 @@ test("Apollo identity controls and private/shared clearing", async ({
   await expect(page.getByText("Purpose.", { exact: true })).toBeVisible();
   await expect(page.getByText("Discretion.", { exact: true })).toBeVisible();
   await page.getByLabel("Your starting point").fill("Synthetic private draft");
-  await page.getByLabel("Send my message and selected entries").check();
+  await page.getByLabel("Send my message, selected entries").check();
   await expect(
     page.getByRole("button", { name: "Ask Apollo", exact: true }),
   ).toBeDisabled();
@@ -28,7 +28,7 @@ test("Apollo identity controls and private/shared clearing", async ({
     .click();
   await expect(page.getByLabel("Your starting point")).toHaveValue("");
   await expect(
-    page.getByLabel("Send my message and selected entries"),
+    page.getByLabel("Send my message, selected entries"),
   ).not.toBeChecked();
   await expect(
     page.getByText("Only Juntos entries can be selected.", { exact: false }),
@@ -43,4 +43,62 @@ test("Apollo identity controls and private/shared clearing", async ({
     ),
   ).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test("Apollo teaching, correction and forgetting in a clearly labeled preview", async ({
+  page,
+}, info) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open Apollo", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Memory & learning", exact: true })
+    .click();
+  await expect(
+    page.getByText("Teach me your world.", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Teach Apollo", exact: true }).click();
+  await page.getByLabel("Title", { exact: true }).fill("Our campaign process");
+  await page
+    .getByLabel("What should Apollo learn?")
+    .fill("Before designing, agree on the audience and one clear goal.");
+  await page.getByRole("combobox", { name: "Type", exact: true }).selectOption("workflow");
+  await page.getByLabel("Who can see this?").selectOption("shared");
+  await page
+    .getByRole("button", { name: "Save teaching", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Our campaign process", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Preview teaching saved", { exact: false }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Correct", exact: true }).click();
+  await page
+    .getByLabel("What should Apollo learn?")
+    .fill("Agree on the audience, one goal, and the budget before designing.");
+  await page
+    .getByRole("button", { name: "Save correction", exact: true })
+    .click();
+  await expect(
+    page.getByText(
+      "Agree on the audience, one goal, and the budget before designing.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await page.screenshot({
+    path: `../../outputs/Apollo-memory-${info.project.name}.png`,
+    fullPage: true,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+  await page.getByRole("button", { name: "Forget", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Delete permanently", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Our campaign process", exact: true }),
+  ).toHaveCount(0);
 });

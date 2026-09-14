@@ -4,11 +4,16 @@ import {
   type ApolloMode,
   type ApolloPreferences,
 } from "./apollo";
+import type { MemorySource, ConversationTurn } from "./memory";
 import type { LifeRecord } from "../model";
 export type AiRequest = {
   message: string;
   context: "private" | "shared";
   records: LifeRecord[];
+  sources?: MemorySource[];
+  history?: ConversationTurn[];
+  omittedHistory?: boolean;
+  conversationSaved?: boolean;
   mode: ApolloMode;
   preferences?: ApolloPreferences;
 };
@@ -37,6 +42,25 @@ export class OpenAIProvider implements AiProvider {
         input: JSON.stringify({
           mode: input.mode,
           context: input.context,
+          memoryCapability: {
+            conversationSaved: !!input.conversationSaved,
+            selectiveRecall: true,
+            omittedHistory: !!input.omittedHistory,
+          },
+          recentConversation: input.history?.map((t) => ({
+            user: t.user_message,
+            apollo: t.assistant_message,
+            date: t.created_at,
+          })),
+          recalledSources: input.sources?.map((s, i) => ({
+            reference: `M${i + 1}`,
+            title: s.title,
+            content: s.content,
+            source: s.kind,
+            owner: s.owner_id,
+            date: s.updated_at,
+            details: s.details,
+          })),
           authorizedContext: input.records.map((r) => ({
             title: r.title,
             body: r.body,

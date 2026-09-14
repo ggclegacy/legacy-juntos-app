@@ -67,3 +67,8 @@ Verification: 73 unit/API/PostgreSQL checks, lint, TypeScript and production bui
 Researched all ten identity principles and expanded Apollo into a coherent coach, companion, educator, wellness/faith advisor and strategic/creative partner. Added a 17-source research report, versioned server-owned identity, role/approach/tone/depth/language controls, and an in-app principles summary. Shared the foundation with specialized AI routes while preserving their strict task contracts. Strengthened main-chat identity binding and rejection of duplicate or unauthorized context selections; fixed dialog accessible naming.
 
 Software validation covers 79 unit/API/database tests, lint, TypeScript and production compilation. Sixteen synthetic live-model review scenarios are available but skipped by default; behavioral quality and hosted credentials are not certified by software tests. Full subject retrieval, durable chat memory and autonomous actions remain future builds. See `docs/apollo/IMPLEMENTATION.md`.
+
+
+## Apollo durable memory and learning — September 13, 2026
+
+Added a ten-source research blueprint and implemented an explicit teaching library, author-only revision history, retirement/deletion, private saved conversations, opt-in lexical recall of teachings/history/app activity, source receipts, and stale-source dependency checks before replay and after generation. Storage and consent remain separate; teaching never changes model weights or system instructions. Connected use requires migration 006 and existing Supabase credentials. Semantic search, reviewed file ingestion, automated extraction and live-model memory evaluation remain future work. See `docs/apollo/MEMORY-IMPLEMENTATION.md` for precise limits and release setup.

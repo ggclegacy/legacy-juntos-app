@@ -1406,6 +1406,7 @@ export function Sanctuary() {
       )}
       {ai && (
         <AiPanel
+          members={members}
           key={`${demo}:${workspaceId}:${userId}`}
           userId={userId}
           records={visible}

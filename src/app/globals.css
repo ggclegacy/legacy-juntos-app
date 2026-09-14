@@ -2409,3 +2409,32 @@ th {
 .apollo-principles ol{padding-left:22px;line-height:1.75;font-size:12px;color:#b8cdbf}
 .apollo-principles li{margin:9px 0}.apollo-principles strong{color:#ead7ae}
 @media(max-width:550px){.apollo-controls{grid-template-columns:1fr}}
+
+/* Apollo memory: a quiet knowledge library within the sanctuary. */
+.apollo-memory-entry {display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.25rem;border:1px solid rgba(228,190,87,.3);border-radius:18px;background:linear-gradient(120deg,rgba(6,104,74,.24),rgba(17,27,25,.65));box-shadow:inset 0 1px rgba(255,255,255,.06),0 14px 32px rgba(0,0,0,.18)}
+.apollo-memory-entry p {margin:.45rem 0 0;font-size:.86rem}
+.apollo-library {display:grid;gap:1.2rem;min-width:0;padding:25px 30px 30px}
+.apollo-memory-hero {padding:1.8rem 0 1rem;display:grid;gap:.7rem;border-bottom:1px solid rgba(213,180,84,.2)}
+.apollo-memory-hero>svg {color:#e1bf6b;filter:drop-shadow(0 0 16px rgba(220,180,50,.35))}
+.apollo-memory-hero h3 {font-family:var(--serif);font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:0}
+.apollo-memory-hero p {max-width:50ch;line-height:1.7;color:#b7c8bc;margin:0}
+.apollo-library-toolbar {display:flex;gap:1rem;align-items:end;justify-content:space-between}
+.apollo-library-toolbar label {flex:1}
+.apollo-teaching {display:grid;gap:1rem;padding:1.4rem;border:1px solid rgba(219,188,101,.35);border-radius:18px;background:linear-gradient(130deg,rgba(16,80,60,.26),rgba(10,21,17,.9));box-shadow:0 20px 50px rgba(0,0,0,.2)}
+.apollo-teaching details>label {margin-top:.85rem}
+.apollo-memory-card {padding:1.2rem 0;border-bottom:1px solid rgba(198,218,207,.14);min-width:0}
+.apollo-memory-card h4 {font-size:1.1rem;margin:.65rem 0}
+.apollo-memory-card small,.apollo-transcript small {color:#a4b5ab;font-size:.75rem}
+.apollo-memory-meta,.apollo-memory-actions {display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.apollo-memory-meta {font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#cfb776;justify-content:space-between}
+.apollo-memory-actions {margin-top:1rem}
+.apollo-memory-content {white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65;font-size:.88rem}
+.apollo-memory-card>.apollo-memory-content {max-height:14rem;overflow:auto}
+.apollo-memory-empty {text-align:center;padding:2.5rem 1rem;color:#acbfb3}
+.apollo-memory-empty>svg {color:#d6b86b}
+.apollo-transcript {padding:1rem;border-radius:14px;background:rgba(7,31,23,.45);border:1px solid rgba(116,184,146,.2)}
+.apollo-transcript>details,.apollo-sources details {padding:.8rem 0;border-bottom:1px solid rgba(198,218,207,.12)}
+.apollo-transcript summary,.apollo-sources summary {overflow-wrap:anywhere}
+.apollo-library input,.apollo-library textarea,.apollo-library select {min-width:0;max-width:100%}
+.apollo-library .ai-actions {flex-wrap:wrap}
+@media(max-width:600px){.apollo-library{padding:22px 20px}.apollo-memory-entry,.apollo-library-toolbar{flex-direction:column;align-items:stretch}.apollo-memory-entry{padding:1rem}.apollo-teaching{padding:1rem}.apollo-library-toolbar>.primary{width:100%}}
