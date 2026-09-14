@@ -137,6 +137,7 @@ export async function POST(request: Request) {
         .from("apollo_conversations")
         .insert({
           title: v.title,
+          ...(v.recordIds.length ? { record_ids: v.recordIds } : {}),
           context: v.context,
           owner_id: user.id,
           workspace_id: membership.workspace_id,
