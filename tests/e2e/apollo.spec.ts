@@ -123,9 +123,9 @@ test("Apollo recall and learning controls explain consent without simulating AI"
   await page
     .getByRole("button", { name: "Teach Apollo from this message" })
     .click();
-  await expect(page.getByLabel("Your words", { exact: true })).toHaveValue(
-    "I prefer evening workouts.",
-  );
+  await expect(
+    page.getByRole("textbox", { name: "Your words", exact: true }),
+  ).toHaveValue("I prefer evening workouts.");
   await expect(
     page.getByRole("button", { name: "Suggest what to remember" }),
   ).toBeDisabled();

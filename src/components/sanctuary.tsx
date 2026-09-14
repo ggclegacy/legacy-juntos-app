@@ -49,6 +49,7 @@ import { AiPanel } from "./ai-panel";
 import { Performance } from "./performance";
 import { Nutrition } from "./nutrition/workspace";
 import { Protocols } from "./protocols";
+import { Studio } from "./studio/workspace";
 import { useMaterialMotion } from "./material-motion";
 
 type View = "home" | "protocols" | "nutrition" | Domain;
@@ -779,7 +780,8 @@ export function Sanctuary() {
               display:
                 view === "performance" ||
                 view === "protocols" ||
-                view === "nutrition"
+                view === "nutrition" ||
+                view === "studio"
                   ? "none"
                   : undefined,
             }}
@@ -852,7 +854,20 @@ export function Sanctuary() {
               request={request}
             />
           </div>
-          {view === "nutrition" ? (
+          {view === "studio" ? (
+            <Studio
+              key={`${demo}:${workspaceId}:${userId}`}
+              userId={userId}
+              workspaceId={workspaceId}
+              members={members}
+              demo={demo}
+              request={request}
+              legacyRecords={records.filter((r) =>
+                canRead(r, userId, workspaceId),
+              )}
+              onLegacy={setDetail}
+            />
+          ) : view === "nutrition" ? (
             <Nutrition
               key={`${demo}:${workspaceId}:${userId}`}
               userId={userId}
@@ -1176,30 +1191,7 @@ export function Sanctuary() {
                   </button>
                 </div>
               )}
-              {view === "studio" && (
-                <div className="studio-flow">
-                  {["Idea", "Concept", "Production", "Review", "Ready"].map(
-                    (s, i) => (
-                      <div key={s}>
-                        <span>0{i + 1}</span>
-                        <h3>{s}</h3>
-                        <small>
-                          {
-                            filtered.filter(
-                              (r) =>
-                                r.kind === "campaign" &&
-                                (r.metadata.stage ?? "idea") ===
-                                  s.toLowerCase(),
-                            ).length
-                          }{" "}
-                          briefs
-                        </small>
-                        {i < 4 && <ChevronRight size={17} />}
-                      </div>
-                    ),
-                  )}
-                </div>
-              )}
+
               {view === "business" && (
                 <div className="business-actions">
                   <button
@@ -1315,33 +1307,6 @@ export function Sanctuary() {
                       </button>
                     </section>
                   ))}
-                </div>
-              ) : view === "studio" ? (
-                <div className="brief-grid">
-                  {filtered.map((r) => (
-                    <button
-                      key={r.id}
-                      className="brief"
-                      onClick={() => setDetail(r.id)}
-                    >
-                      <div className="brief-art">
-                        <span className="brief-lines" />
-                        <span>
-                          {(r.metadata.stage ?? "idea").toUpperCase()}
-                        </span>
-                        <Palette size={36} />
-                      </div>
-                      <div className="brief-text">
-                        <span className="eyebrow">CREATIVE BRIEF</span>
-                        <h3>{r.title}</h3>
-                        <p>{r.metadata.objective ?? r.body}</p>
-                        <Audience record={r} />
-                        <ArrowUpRight size={17} />
-                      </div>
-                    </button>
-                  ))}
-                  {!filtered.length &&
-                    recordList([], "Your next idea starts here.")}
                 </div>
               ) : view === "memories" ? (
                 <div className="timeline">
