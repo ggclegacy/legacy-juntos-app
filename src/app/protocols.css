@@ -1,6 +1,6 @@
 .protocol-workspace {
-  --protocol-gold: #f0d894;
-  --protocol-mint: #5ce8af;
+  --protocol-gold: var(--gold-primary);
+  --protocol-mint: var(--success);
   max-width: 1400px;
   margin: auto;
   padding-bottom: 50px;
@@ -10,21 +10,19 @@
   overflow: hidden;
   min-height: 365px;
   padding: 42px;
-  border: 1px solid #6bd7a749;
+  border: 1px solid var(--border-subtle);
   border-radius: 25px;
   background:
-    radial-gradient(ellipse at 85% 70%, #25c88438, transparent 50%),
-    linear-gradient(120deg, #06261de6, #072b22b0 65%, #0e4a399c);
+    var(--surface-immersive);
   box-shadow:
-    inset 0 1px 0 #ffffff20,
-    0 25px 60px #0005;
+    var(--elevation-panel);
 }
 .protocol-hero:after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(130deg, #ffffff08, transparent 30%, #f2d99608);
+  background: linear-gradient(130deg, var(--emerald-atmospheric), transparent 30%, var(--emerald-atmospheric));
   border-radius: inherit;
 }
 .protocol-hero-content {
@@ -36,7 +34,7 @@
   font-size: clamp(44px, 5vw, 76px);
   line-height: 0.97;
   margin: 22px 0;
-  color: #fff7e3;
+  color: var(--text-primary);
   letter-spacing: -2px;
 }
 .protocol-hero h1 em {
@@ -45,7 +43,7 @@
 }
 .protocol-hero p {
   line-height: 1.7;
-  color: #b3cfc1;
+  color: var(--text-secondary);
 }
 .protocol-orbit {
   position: absolute;
@@ -57,12 +55,9 @@
   place-items: center;
   color: var(--protocol-mint);
   border-radius: 50%;
-  border: 1px solid #6de6b956;
+  border: 1px solid var(--border-subtle);
   box-shadow:
-    0 0 0 25px #66dda008,
-    0 0 0 65px #66dda006,
-    0 0 90px #00ff8840,
-    inset 0 0 60px #31f7a714;
+    none;
   transform: rotate(-12deg);
 }
 .protocol-private {
@@ -73,7 +68,7 @@
   gap: 8px;
   align-items: center;
   font-size: 11px;
-  color: #b2caba;
+  color: var(--text-secondary);
   z-index: 1;
 }
 .protocol-actions {
@@ -88,8 +83,8 @@
   gap: 8px;
   padding: 10px;
   margin: 22px 0;
-  background: #031b15a8;
-  border: 1px solid #a0ddb51a;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
   border-radius: 15px;
   overflow: auto;
 }
@@ -99,12 +94,12 @@
   padding: 12px 22px;
   white-space: nowrap;
   border-radius: 10px;
-  color: #a2c2b2;
+  color: var(--text-secondary);
 }
 .protocol-nav button[aria-pressed="true"] {
-  color: #fcdf93;
-  background: linear-gradient(130deg, #25765788, #31563b44);
-  box-shadow: inset 0 1px 0 #a9eab33a;
+  color: var(--gold-primary);
+  background: var(--selection-surface);
+  box-shadow: var(--elevation-panel);
 }
 .protocol-metrics {
   display: grid;
@@ -116,14 +111,14 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  border-bottom: 1px solid #b3d7ba24;
+  border-bottom: 1px solid var(--border-subtle);
   padding: 15px;
-  color: #90b7a2;
+  color: var(--text-secondary);
 }
 .protocol-metrics strong {
   font-size: 30px;
   font-weight: 500;
-  color: #f7e9b9;
+  color: var(--gold-primary);
 }
 .protocol-metrics span {
   font-size: 12px;
@@ -141,34 +136,33 @@
 .protocol-card {
   padding: 26px;
   border-radius: 18px;
-  border: 1px solid #78caa12b;
-  background: linear-gradient(140deg, #123c2ce6, #091f1ab8);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
   box-shadow:
-    0 12px 30px #0003,
-    inset 0 1px 0 #d6edbc17;
+    var(--elevation-panel);
   backdrop-filter: blur(16px);
   margin-bottom: 18px;
   overflow-wrap: anywhere;
 }
 .protocol-card h3 {
   font-size: 20px;
-  color: #f4edda;
+  color: var(--text-primary);
   margin: 12px 0;
 }
 .protocol-card p {
   font-size: 13px;
   line-height: 1.8;
-  color: #b5c8bc;
+  color: var(--text-secondary);
 }
 .protocol-card small {
   display: block;
-  color: #9bb5a7;
+  color: var(--text-secondary);
   font-size: 11px;
   margin-top: 16px;
 }
 .protocol-card hr {
   border: 0;
-  border-top: 1px solid #cad9aa24;
+  border-top: 1px solid var(--border-subtle);
   margin: 25px 0;
 }
 .protocol-card button.small {
@@ -177,8 +171,7 @@
 .protocol-feature {
   align-self: start;
   background:
-    radial-gradient(ellipse at top right, #79ae3340, transparent 70%),
-    linear-gradient(150deg, #164533, #0a231d);
+    var(--surface-immersive);
   padding: 32px;
   color: var(--protocol-gold);
 }
@@ -197,39 +190,39 @@
   font-family: "Cormorant Garamond", serif;
   font-size: 32px;
   line-height: 1.1;
-  color: #f4ead0;
+  color: var(--text-primary);
   margin: 10px 0 16px;
 }
 .protocol-muted {
   font-size: 12px;
-  color: #9bb8a8;
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 .protocol-notice {
-  border-left: 2px solid #c8b66f;
+  border-left: 2px solid var(--border-premium);
   padding: 12px 16px;
-  color: #b8cdbf;
+  color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.7;
   margin: 16px 0;
-  background: #bddd9007;
+  background: var(--edge-light);
 }
 .protocol-empty {
   padding: 48px 25px;
   text-align: center;
-  border: 1px dashed #88c9a33b;
+  border: 1px dashed var(--border-subtle);
   border-radius: 18px;
-  color: #bdd9bc;
+  color: var(--text-secondary);
 }
 .protocol-empty h3 {
   font-size: 22px;
-  color: #f5ecd3;
+  color: var(--text-primary);
 }
 .protocol-empty p {
   max-width: 440px;
   margin: 12px auto;
   line-height: 1.8;
-  color: #9bb9aa;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 .protocol-lab {
@@ -241,12 +234,12 @@
   transition: border-color 0.2s;
 }
 .protocol-lab:hover {
-  border-color: #c6d18680;
+  border-color: var(--border-subtle);
 }
 .protocol-value {
   font-size: 38px;
   line-height: 1.1;
-  color: #f9e7b0;
+  color: var(--gold-primary);
   margin: 12px 0 20px;
 }
 .protocol-value small {
@@ -256,13 +249,13 @@
 }
 .protocol-range {
   font-size: 11px;
-  color: #c6d5bb;
+  color: var(--text-secondary);
   margin-bottom: 14px;
 }
 .protocol-chart {
   width: 100%;
   height: 140px;
-  background: linear-gradient(0deg, #36c3890a, transparent);
+  background: var(--surface-raised);
   margin: 15px 0;
 }
 .protocol-select,
@@ -271,7 +264,7 @@
   flex-direction: column;
   gap: 8px;
   font-size: 12px;
-  color: #b2cbbb;
+  color: var(--text-secondary);
 }
 .protocol-select {
   margin-bottom: 20px;
@@ -283,10 +276,10 @@
 .protocol-form select {
   width: 100%;
   padding: 12px;
-  background: #061d16;
-  border: 1px solid #a4c98d44;
+  background: var(--surface-1);
+  border: 1px solid var(--border-control);
   border-radius: 8px;
-  color: #f1f1dc;
+  color: var(--text-primary);
   font: inherit;
 }
 .protocol-form {
@@ -299,7 +292,7 @@
   grid-column: 1/-1;
   font-size: 12px;
   line-height: 1.7;
-  color: #aec5b8;
+  color: var(--text-secondary);
 }
 .protocol-form > .protocol-confirm {
   flex-direction: row;
@@ -374,9 +367,9 @@
   gap: 15px;
   padding: 14px 0;
   border: 0;
-  border-bottom: 1px solid #acd6aa24;
+  border-bottom: 1px solid var(--border-subtle);
   background: none;
-  color: #c2d9cb;
+  color: var(--text-secondary);
   text-align: left;
   width: 100%;
   font-size: 12px;
@@ -385,7 +378,7 @@
 .protocol-confirm {
   font-size: 12px;
   line-height: 1.8;
-  color: #b5c8bc;
+  color: var(--text-secondary);
   display: flex;
   gap: 10px;
   margin: 20px 0;

@@ -676,7 +676,7 @@ function LabContext({
         >
           <polyline
             fill="none"
-            stroke="#57e8b1"
+            stroke="var(--success)"
             strokeWidth="3"
             points={values
               .map(
@@ -691,7 +691,7 @@ function LabContext({
               cx={20 + (i * 560) / (values.length - 1)}
               cy={100 - ((v - min) / (max - min || 1)) * 80}
               r="5"
-              fill="#efd58c"
+              fill="var(--gold-primary)"
             />
           ))}
         </svg>

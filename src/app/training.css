@@ -1,7 +1,7 @@
 .training-space {
-  --train-line: rgba(106, 223, 159, 0.19);
-  --train-gold: #e9c86b;
-  color: #e7f4ec;
+  --train-line: var(--border-subtle);
+  --train-gold: var(--gold-primary);
+  color: var(--text-primary);
   max-width: 1400px;
   margin: auto;
 }
@@ -16,9 +16,9 @@
 .training-space textarea,
 .training-space select {
   width: 100%;
-  background: #061c17;
-  color: #effbf5;
-  border: 1px solid #335247;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-control);
   border-radius: 9px;
   padding: 11px 12px;
   font: inherit;
@@ -29,14 +29,14 @@
   flex-direction: column;
   gap: 7px;
   font-size: 12px;
-  color: #b3cbbd;
+  color: var(--text-secondary);
 }
 .training-space textarea {
   resize: vertical;
   min-height: 95px;
 }
 .training-space :focus-visible {
-  outline: 2px solid #eed57e;
+  outline: 2px solid var(--gold-bright);
   outline-offset: 3px;
 }
 .training-hero {
@@ -47,14 +47,12 @@
   align-items: center;
   min-height: 350px;
   padding: 44px;
-  border: 1px solid #3a7252;
+  border: 1px solid var(--border-subtle);
   border-radius: 24px;
   background:
-    radial-gradient(ellipse at 83% 0%, #126e4680, transparent 65%),
-    linear-gradient(130deg, #062820, #071b17 65%, #063e2a);
+    var(--surface-immersive);
   box-shadow:
-    inset 0 1px #b1ffba28,
-    0 25px 65px #0005;
+    var(--elevation-panel);
   margin: 12px 0 18px;
 }
 .training-hero .eyebrow,
@@ -62,7 +60,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #c4d89d;
+  color: var(--gold-primary);
 }
 .training-hero h1 {
   font-family: var(--font-sans, Manrope), sans-serif !important;
@@ -79,12 +77,12 @@
   letter-spacing: -1px;
 }
 .training-hero p {
-  color: #a9c9b8;
+  color: var(--text-secondary);
   margin-bottom: 26px;
 }
 .training-orbit {
   aspect-ratio: 1;
-  border: 1px solid #c7d39245;
+  border: 1px solid var(--border-subtle);
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -92,9 +90,9 @@
   background: repeating-radial-gradient(
     circle,
     transparent 0 38px,
-    #83dd9620 39px 40px
+    var(--edge-light) 39px 40px
   );
-  box-shadow: 0 0 90px #35c98418;
+  box-shadow: none;
 }
 .training-orbit > div {
   display: flex;
@@ -102,7 +100,7 @@
   align-items: center;
   gap: 14px;
   transform: rotate(10deg);
-  color: #d9c780;
+  color: var(--gold-primary);
 }
 .training-orbit span {
   font-size: 27px;
@@ -111,14 +109,14 @@
 .training-orbit small {
   font-size: 8px;
   letter-spacing: 2px;
-  color: #abc5b5;
+  color: var(--gold-primary);
 }
 .training-status {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   font-size: 11px;
-  color: #abc6b7;
+  color: var(--text-secondary);
   padding: 8px 3px;
 }
 .training-status span:first-child {
@@ -128,8 +126,8 @@
 }
 .training-demo {
   font-size: 11px;
-  color: #c9bc8b;
-  background: #d4ae4310;
+  color: var(--gold-primary);
+  background: var(--gold-wash);
   padding: 10px 14px;
   border-radius: 8px;
 }
@@ -145,15 +143,15 @@
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: #94b29f;
+  color: var(--text-secondary);
   font: inherit;
   font-size: 13px;
   white-space: nowrap;
 }
 .training-tabs button[aria-current] {
-  color: #edcf79;
-  border-color: #dabb64;
-  background: linear-gradient(0deg, #e9c86b10, transparent);
+  color: var(--gold-primary);
+  border-color: var(--gold-primary);
+  background: var(--selection-surface);
 }
 .training-section-heading {
   display: flex;
@@ -172,7 +170,7 @@
 }
 .training-section-heading p,
 .training-panel p {
-  color: #abc1b4;
+  color: var(--text-secondary);
   font-size: 13px;
 }
 .training-stats {
@@ -191,12 +189,12 @@
 .training-stats strong {
   font-size: 32px;
   font-weight: 500;
-  color: #e9ce82;
+  color: var(--gold-primary);
   font-variant-numeric: tabular-nums;
 }
 .training-stats span {
   font-size: 11px;
-  color: #a0b6aa;
+  color: var(--text-secondary);
 }
 .training-workouts,
 .training-entry-paths {
@@ -207,13 +205,12 @@
 .training-workouts article,
 .training-entry-paths > button {
   position: relative;
-  border: 1px solid #508a614a;
-  background: linear-gradient(145deg, #18503666, #091e1bf0);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
   border-radius: 17px;
   padding: 24px;
   box-shadow:
-    inset 0 1px #ccffd51a,
-    0 16px 30px #0003;
+    var(--elevation-panel);
   backdrop-filter: blur(14px);
   transition:
     transform 0.2s,
@@ -223,7 +220,7 @@
 .training-workouts article:hover,
 .training-entry-paths > button:hover {
   transform: translateY(-3px);
-  border-color: #dfc77288;
+  border-color: var(--border-premium);
 }
 .training-workouts h3 {
   font-size: 22px;
@@ -233,7 +230,7 @@
 .training-workouts p,
 .training-entry-paths span {
   font-size: 12px;
-  color: #a7bfb1;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 .training-muscles {
@@ -247,39 +244,39 @@
   padding: 5px 8px;
   border: 1px solid var(--train-line);
   border-radius: 5px;
-  color: #c9dccf;
+  color: var(--text-secondary);
 }
 .training-entry-paths > button {
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  color: #d6c588;
+  color: var(--gold-primary);
 }
 .training-entry-paths strong {
-  color: #e7f3e9;
+  color: var(--text-primary);
   font-size: 16px;
 }
 .training-empty {
   padding: 55px 24px;
   text-align: center;
-  border: 1px dashed #4e7762;
+  border: 1px dashed var(--border-subtle);
   border-radius: 17px;
-  background: radial-gradient(ellipse at center, #12523830, transparent);
+  background: var(--surface-raised);
   margin: 22px 0;
 }
 .training-empty > svg {
-  color: #d9c780;
+  color: var(--gold-primary);
 }
 .training-empty p {
   max-width: 520px;
   margin: 15px auto 25px;
-  color: #a8c0b3;
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 .training-panel,
 .training-builder {
-  background: linear-gradient(135deg, #102e2460, #061711e6);
+  background: var(--surface-raised);
   border: 1px solid var(--train-line);
   border-radius: 18px;
   padding: 28px;
@@ -294,10 +291,10 @@
 }
 .training-panel pre {
   white-space: pre-wrap;
-  background: #04120e;
+  background: var(--surface-2);
   padding: 16px;
   border-radius: 9px;
-  color: #b8dbba;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 .training-fields {
@@ -317,14 +314,14 @@
   align-items: center;
   gap: 5px;
   border: 1px solid var(--train-line);
-  background: #0a241c;
+  background: var(--surface-2);
   border-radius: 8px;
   padding: 11px 14px;
-  color: #b3c8bb;
+  color: var(--text-secondary);
 }
 .training-day-tabs .selected {
-  border-color: #ddc67b;
-  color: #e9cf88;
+  border-color: var(--border-control);
+  color: var(--gold-primary);
 }
 .training-exercise-editor {
   padding: 22px 0;
@@ -332,13 +329,13 @@
 }
 .training-exercise-editor .inline-actions button {
   padding: 8px;
-  background: #11291f;
+  background: var(--surface-2);
   border: 1px solid var(--train-line);
-  color: #cbd8ca;
+  color: var(--text-secondary);
   border-radius: 6px;
 }
 .training-number {
-  color: #bca664;
+  color: var(--gold-primary);
   margin-right: 15px;
   font-weight: 400;
   font-size: 12px;
@@ -351,12 +348,12 @@
 }
 .training-space summary {
   cursor: pointer;
-  color: #bfceb9;
+  color: var(--text-secondary);
   font-size: 12px;
   padding: 12px 0;
 }
 .training-space small {
-  color: #91ac9a;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 .training-exercise-options {
@@ -375,8 +372,8 @@
   padding: 12px;
   border: 1px solid var(--train-line);
   border-radius: 8px;
-  color: #d1ddce;
-  background: #092419;
+  color: var(--text-primary);
+  background: var(--surface-2);
 }
 .training-exercise-options small {
   display: block;
@@ -391,7 +388,7 @@
   position: sticky;
   bottom: 12px;
   padding: 16px;
-  background: #0b201aeb;
+  background: var(--surface-3);
   backdrop-filter: blur(12px);
   border: 1px solid var(--train-line);
   border-radius: 12px;
@@ -399,7 +396,7 @@
 }
 .training-save span {
   font-size: 11px;
-  color: #a4bcae;
+  color: var(--text-secondary);
 }
 .training-program-list article {
   display: flex;
@@ -416,7 +413,7 @@
 }
 .training-program-list p {
   font-size: 12px;
-  color: #9fb5a6;
+  color: var(--text-secondary);
 }
 .training-rest {
   position: sticky;
@@ -424,32 +421,32 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  background: #143c2c;
-  border: 1px solid #bfad6855;
+  background: var(--emerald-deep);
+  border: 1px solid var(--border-premium);
   border-radius: 12px;
   padding: 14px;
   z-index: 3;
 }
 .training-rest strong {
   font-variant-numeric: tabular-nums;
-  color: #f0d682;
+  color: var(--gold-primary);
   font-size: 23px;
 }
 .training-rest button {
   border: 0;
-  color: #b5caba;
+  color: var(--text-secondary);
   background: none;
   font-size: 11px;
 }
 .training-progress-track {
   height: 3px;
-  background: #244234;
+  background: var(--surface-2);
   margin: 22px 0;
 }
 .training-progress-track span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #37b373, #ead076);
+  background: linear-gradient(90deg, var(--success), var(--gold-primary));
   transition: width 0.2s;
 }
 .training-gym-exercise {
@@ -457,7 +454,7 @@
   border-radius: 16px;
   padding: 24px;
   margin: 18px 0;
-  background: linear-gradient(125deg, #16402c66, #081b16);
+  background: var(--surface-raised);
 }
 .training-gym-exercise h3 {
   font-size: 23px;
@@ -468,13 +465,13 @@
 }
 .training-cue {
   padding: 12px;
-  border-left: 2px solid #c9b566;
-  background: #c9b56608;
+  border-left: 2px solid var(--border-premium);
+  background: var(--gold-wash);
   font-size: 13px;
 }
 .training-previous {
   font-size: 12px;
-  color: #b6cbb9;
+  color: var(--text-secondary);
   margin: 18px 0;
 }
 .training-set-head,
@@ -487,11 +484,11 @@
 }
 .training-set-head {
   font-size: 10px;
-  color: #9aaf9e;
+  color: var(--text-secondary);
 }
 .training-set > span {
   font-size: 13px;
-  color: #bcccbf;
+  color: var(--text-secondary);
 }
 .training-set input {
   text-align: center;
@@ -502,27 +499,27 @@
 .training-set button {
   height: 45px;
   border-radius: 9px;
-  border: 1px solid #577f61;
-  background: #1b3e2d;
-  color: #c0d2bc;
+  border: 1px solid var(--border-control);
+  background: var(--surface-1);
+  color: var(--text-secondary);
   display: grid;
   place-items: center;
 }
 .training-set button.logged {
-  background: #cebb75;
-  color: #14251a;
-  border-color: #e6d284;
+  background: var(--gold-primary);
+  color: var(--text-on-gold);
+  border-color: var(--border-control);
 }
 .training-set.done input {
   opacity: 0.7;
-  background: #19402b;
+  background: var(--surface-1);
 }
 .training-history-entry {
   padding: 15px 20px;
   border: 1px solid var(--train-line);
   border-radius: 12px;
   margin: 12px 0;
-  background: #0a231a88;
+  background: var(--surface-2);
 }
 .training-history-entry summary {
   display: flex;
@@ -551,13 +548,13 @@
 .training-checkbox input {
   width: 18px !important;
   height: 18px;
-  accent-color: #d7bc67;
+  accent-color: var(--gold-primary);
 }
 .training-device {
   border-top: 1px solid var(--train-line);
   margin-top: 35px;
   font-size: 12px;
-  color: #a3b9aa;
+  color: var(--text-secondary);
 }
 .training-device p {
   line-height: 1.7;
@@ -568,7 +565,7 @@
 .training-loading {
   padding: 70px;
   text-align: center;
-  color: #c9b779;
+  color: var(--gold-primary);
 }
 .training-space .muted {
   font-size: 12px;
@@ -712,7 +709,7 @@
 }
 .training-plate p {
   font-size: 13px;
-  color: #d4c684;
+  color: var(--gold-primary);
 }
 .training-muscle-bar {
   display: grid;
@@ -724,19 +721,19 @@
 }
 .training-muscle-bar > div {
   height: 6px;
-  background: #294333;
+  background: var(--surface-2);
   border-radius: 4px;
   overflow: hidden;
 }
 .training-muscle-bar i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #299d60, #dfc56c);
+  background: linear-gradient(90deg, var(--success), var(--gold-primary));
 }
 .training-muscle-bar strong {
   font-size: 11px;
   font-weight: 500;
-  color: #d0c69a;
+  color: var(--gold-primary);
 }
 
 .training-space:has(.training-gym) .training-hero {

@@ -207,7 +207,7 @@ export function AiPanel({
           onConversation={openConversation}
         />
       ) : (
-        <div className="ai-panel">
+        <div className="ai-panel" aria-busy={busy}>
           <div className="ai-emblem">
             <Sparkles size={26} />
           </div>
