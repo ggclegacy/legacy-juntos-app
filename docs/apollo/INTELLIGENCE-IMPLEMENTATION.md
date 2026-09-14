@@ -1,5 +1,6 @@
 # Apollo: meaning-based recall and reviewed learning
 
+> Historical implementation notes. For the current document library and cited research, see [Knowledge setup](KNOWLEDGE-SETUP.md); meaning-based memory details are in [Intelligence setup](INTELLIGENCE-IMPLEMENTATION.md).
 Implemented September 13, 2026. Requires migrations 001, 002, 003, 005, 006 and **007_apollo_intelligence.sql**, plus the existing server-side OpenAI configuration. Migration 004_health_reports.sql remains required for the application's separate health report storage setup.
 
 ## What changed

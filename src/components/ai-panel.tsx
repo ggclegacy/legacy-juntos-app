@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Sparkles, Lock, Mic, ArrowUp, Copy } from "lucide-react";
+import { KnowledgeWorkspace } from "./knowledge/workspace";
+import { safeSourceUrl } from "@/lib/ai/knowledge/model";
 import { ApolloRecall } from "./apollo-recall";
 import { ApolloMemoryLibrary } from "./apollo-memory";
 import {
@@ -54,6 +56,7 @@ export function AiPanel({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
+  const [knowledge, setKnowledge] = useState(false);
   const [library, setLibrary] = useState(false),
     [teaching, setTeaching] = useState("");
   const [recallSources, setRecallSources] = useState<RecallKind[]>(["memory"]);
@@ -207,7 +210,15 @@ export function AiPanel({
   }
   return (
     <Modal title="Apollo" onClose={onClose} wide>
-      {library ? (
+      {knowledge ? (
+        <KnowledgeWorkspace
+          request={request}
+          userId={userId}
+          members={members}
+          demo={demo}
+          onBack={() => setKnowledge(false)}
+        />
+      ) : library ? (
         <ApolloMemoryLibrary
           members={members}
           userId={userId}
@@ -225,6 +236,13 @@ export function AiPanel({
           <div className="ai-emblem">
             <Sparkles size={26} />
           </div>
+          <button
+            className="secondary"
+            onClick={() => setKnowledge(true)}
+            disabled={busy}
+          >
+            Knowledge & research
+          </button>
           <p className="lead">
             Your AI coach, companion, and thinking partner. Faith, strength,
             wellbeing, and everything you’re building.
@@ -668,8 +686,43 @@ export function AiPanel({
                       <small>
                         {new Date(s.updated_at).toLocaleString()}
                         {s.details.excerpt ? " · excerpt" : ""}
+                        {s.details.detailsOmitted
+                          ? " · source metadata abbreviated"
+                          : ""}
                       </small>
                       <p className="apollo-memory-content">{s.content}</p>
+                      {s.kind === "knowledge" && (
+                        <p className="muted">
+                          {String(s.details.origin ?? "")} ·{" "}
+                          {String(s.details.source_name ?? "")}
+                          {s.details.published_on
+                            ? ` · published ${s.details.published_on}`
+                            : ""}
+                          {s.details.review_on
+                            ? ` · review ${s.details.review_on}`
+                            : ""}
+                        </p>
+                      )}
+                      {Array.isArray(s.details.references) &&
+                        s.details.references
+                          .filter(
+                            (r): r is { url: string; title: string } =>
+                              !!r &&
+                              typeof r.url === "string" &&
+                              typeof r.title === "string" &&
+                              safeSourceUrl(r.url),
+                          )
+                          .map((r, i) => (
+                            <a
+                              className="knowledge-source-link"
+                              key={`${r.url}:${i}`}
+                              href={r.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {r.title}
+                            </a>
+                          ))}
                     </details>
                   ))}
                 </details>

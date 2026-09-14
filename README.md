@@ -118,3 +118,10 @@ The existing Digital studio now opens a full creative workspace: Brand Vault, ca
 The provider-neutral router has implemented OpenAI image/edit/text, Runway video and ElevenLabs voiceover adapters plus a durable worker. Provider credentials, a configured scheduler and paid-account staging verification are still required. Social publishing is **export only**; connection cards do not represent completed OAuth integrations. Nothing private from Performance/Prep becomes content automatically.
 
 Read [current provider research](docs/studio/RESEARCH.md), [architecture blueprint](docs/studio/BLUEPRINT.md), and [setup / exact integration status](docs/studio/SETUP.md) before enabling. No paid generations, cloud provisioning or live database migration occurred during implementation.
+
+
+## Apollo knowledge & research
+
+Open **Apollo → Knowledge & research** for topic shelves, direct notes/text import, consented PDF/photo transcription, source references, reviewed activation, private/shared audiences, owner-only revisions and archive/deletion. Active passages join keyword and optional meaning-based recall. A separate cited web-research workspace sends only the explicit research question and creates a private review draft when you choose to retain an answer.
+
+Requires **008_apollo_knowledge.sql** after the memory migrations. No new environment variables; the existing OpenAI model must support the requested document/search operation. See [research blueprint](docs/apollo/KNOWLEDGE-BLUEPRINT.md) and [activation, limits and exact behavior](docs/apollo/KNOWLEDGE-SETUP.md). The sample workspace supports temporary document editing/text import and does not simulate live research. Hosted migration/account/provider activation remains unverified.

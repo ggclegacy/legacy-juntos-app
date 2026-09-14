@@ -1,5 +1,6 @@
 # Apollo memory and learning
 
+> Historical implementation notes. For the current document library and cited research, see [Knowledge setup](KNOWLEDGE-SETUP.md); meaning-based memory details are in [Intelligence setup](INTELLIGENCE-IMPLEMENTATION.md).
 ## What ships
 
 Apollo now has a dedicated Memory & learning library. Either member can teach a fact, preference, lesson, workflow, or decision; add an effective date and source note/link; prioritize it; correct it; retire it; and delete it. Audiences are private, a named workspace member, or Juntos. Only the author can change a teaching. Revision history stays author-only even if the latest teaching is shared. A text box accepts pasted notes; URLs are references and are not fetched. No file/OCR importer is implied.

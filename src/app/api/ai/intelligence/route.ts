@@ -9,7 +9,7 @@ import {
 import { EMBEDDING_VERSION, embedTexts } from "@/lib/ai/embeddings";
 import { verifyDependencies } from "@/lib/ai/memory-context";
 import { proposeLearning } from "@/lib/ai/learning";
-const sourceSchema = z.array(z.enum(recallKinds)).min(1).max(6);
+const sourceSchema = z.array(z.enum(recallKinds)).min(1).max(7);
 const requestSchema = z.discriminatedUnion("action", [
   z
     .object({

@@ -71,7 +71,7 @@ export const apolloRequestSchema = z
       ),
     consent: z.literal(true),
     semanticRecall: z.boolean().default(false),
-    recallSources: z.array(z.enum(recallKinds)).max(6).default([]),
+    recallSources: z.array(z.enum(recallKinds)).max(7).default([]),
     conversationId: z.uuid().optional(),
     conversationRevision: z.number().int().nonnegative().optional(),
     preferences: apolloPreferencesSchema.default(defaultApolloPreferences),

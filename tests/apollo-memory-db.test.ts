@@ -40,6 +40,7 @@ beforeAll(async () => {
     "005_nutrition.sql",
     "006_apollo_memory.sql",
     "007_apollo_intelligence.sql",
+    "008_apollo_knowledge.sql",
   ])
     await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users values($1),($2),($3)", [n, k, o]);
@@ -333,6 +334,8 @@ it("revoked members lose memory and recall", async () => {
     ).rows,
   ).toHaveLength(0);
   await expect(teach("Revoked")).rejects.toThrow(/row-level security/);
+  await db.exec("reset role");
+  await db.query("update memberships set active=true where user_id=$1", [k]);
 });
 
 const vector = Array.from({ length: 512 }, (_, i) => (i === 0 ? 1 : 0));
@@ -444,4 +447,156 @@ it("validates persistent conversation connections at the data boundary", async (
       [w, [record]],
     ),
   ).rejects.toThrow(/unavailable/);
+});
+
+async function document(
+  visibility = "private",
+  status = "active",
+  recipient: string | null = null,
+  content = "Coach program squat three sets of ten. Preserve prescribed instructions.",
+) {
+  return (
+    await db.query<{ id: string }>(
+      "insert into apollo_documents(workspace_id,owner_id,title,content,topic,origin,visibility,status,recipient_id) values($1,auth.uid(),'Coach document',$2,'training','coach_document',$3,$4,$5) returning id",
+      [w, content, visibility, status, recipient],
+    )
+  ).rows[0].id;
+}
+it("keeps private documents, shared drafts and passages out of another account", async () => {
+  await as(n);
+  const privateDoc = await document(),
+    sharedDraft = await document("shared", "draft"),
+    sharedDoc = await document("shared"),
+    namedDoc = await document("recipient", "active", k);
+  await as(k);
+  const docs = (
+    await db.query<{ id: string }>("select id from apollo_documents")
+  ).rows.map((r) => r.id);
+  expect(docs).not.toContain(privateDoc);
+  expect(docs).not.toContain(sharedDraft);
+  expect(docs).toContain(sharedDoc);
+  expect(docs).toContain(namedDoc);
+  expect(
+    (
+      await db.query("select * from apollo_passages where document_id=$1", [
+        privateDoc,
+      ])
+    ).rows,
+  ).toHaveLength(0);
+  const shared = (
+    await db.query<{ details: { document_id: string } }>(
+      "select * from apollo_sources('shared',array['knowledge'])",
+    )
+  ).rows.map((r) => r.details.document_id);
+  expect(shared).toContain(sharedDoc);
+  expect(shared).not.toContain(namedDoc);
+  expect(
+    (await db.query("select * from apollo_document_versions")).rows,
+  ).toHaveLength(0);
+  await expect(
+    db.query("update apollo_passages set content='Forged'"),
+  ).rejects.toThrow(/permission denied/);
+  await as(o);
+  expect((await db.query("select * from apollo_documents")).rows).toHaveLength(
+    0,
+  );
+});
+it("chunks the full document and invalidates revised passages, cached vectors and historical dependencies", async () => {
+  await as(n);
+  const content = "A".repeat(1500) + "DEADLIFT five sets" + "B".repeat(2100);
+  const id = await document("private", "active", null, content);
+  const chunks = await db.query<{
+    id: string;
+    ordinal: number;
+    content: string;
+  }>("select * from apollo_passages where document_id=$1 order by ordinal", [
+    id,
+  ]);
+  expect(chunks.rows).toHaveLength(3);
+  expect(chunks.rows.some((c) => c.content.includes("DEADLIFT"))).toBe(true);
+  expect(chunks.rows[2].content.endsWith("B")).toBe(true);
+  const passage = chunks.rows[0].id;
+  await db.query(
+    "insert into apollo_embeddings(owner_id,workspace_id,context,kind,source_id,source_version,model,embedding) values(auth.uid(),$1,'private','knowledge',$2,'1',$3,$4)",
+    [w, passage, embeddingModel, vector],
+  );
+  await db.query(
+    "update apollo_documents set content='Corrected front squat program',revision=2 where id=$1",
+    [id],
+  );
+  expect(
+    (await db.query("select * from apollo_passages where id=$1", [passage]))
+      .rows,
+  ).toHaveLength(0);
+  expect(
+    (
+      await db.query("select * from apollo_embeddings where source_id=$1", [
+        passage,
+      ])
+    ).rows,
+  ).toHaveLength(0);
+  expect(
+    (
+      await db.query("select * from check_apollo_sources('private',$1)", [
+        JSON.stringify([{ kind: "knowledge", id: passage, version: "1" }]),
+      ])
+    ).rows,
+  ).toHaveLength(0);
+  expect(
+    (
+      await db.query(
+        "select * from apollo_document_versions where document_id=$1",
+        [id],
+      )
+    ).rows,
+  ).toHaveLength(2);
+  await expect(
+    db.query("update apollo_documents set revision=2 where id=$1", [id]),
+  ).rejects.toThrow(/revision conflict/);
+  await db.query(
+    "update apollo_documents set status='archived',revision=3 where id=$1",
+    [id],
+  );
+  expect(
+    (await db.query("select * from apollo_passages where document_id=$1", [id]))
+      .rows,
+  ).toHaveLength(0);
+  await db.query("delete from apollo_documents where id=$1", [id]);
+  expect(
+    (
+      await db.query(
+        "select * from apollo_document_versions where document_id=$1",
+        [id],
+      )
+    ).rows,
+  ).toHaveLength(0);
+});
+it("revokes both document access and current recall when a shared document is made private", async () => {
+  await as(n);
+  const id = await document("shared");
+  await as(k);
+  const before = await db.query<{ id: string }>(
+    "select id from apollo_passages where document_id=$1",
+    [id],
+  );
+  expect(before.rows.length).toBe(1);
+  await as(n);
+  await db.query(
+    "update apollo_documents set visibility='private',revision=2 where id=$1",
+    [id],
+  );
+  await as(k);
+  expect(
+    (await db.query("select * from apollo_passages where document_id=$1", [id]))
+      .rows,
+  ).toHaveLength(0);
+  expect(
+    (
+      await db.query("select * from check_apollo_sources('private',$1)", [
+        JSON.stringify([
+          { kind: "knowledge", id: before.rows[0].id, version: "1" },
+        ]),
+      ])
+    ).rows,
+  ).toHaveLength(0);
 });

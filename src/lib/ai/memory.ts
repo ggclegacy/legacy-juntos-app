@@ -13,6 +13,7 @@ export const recallKinds = [
   "training",
   "nutrition",
   "protocol",
+  "knowledge",
 ] as const;
 export type RecallKind = (typeof recallKinds)[number];
 export const recallLabels: Record<RecallKind, string> = {
@@ -22,6 +23,7 @@ export const recallLabels: Record<RecallKind, string> = {
   training: "Training & prep",
   nutrition: "Nutrition",
   protocol: "Protocols & labs",
+  knowledge: "Reviewed knowledge library",
 };
 export const memoryInputSchema = z
   .object({
@@ -146,12 +148,12 @@ export function sourceAllowed(
   if (context === "shared")
     return (
       (s.kind === "conversation" && s.owner_id === owner) ||
-      ((s.kind === "memory" || s.kind === "record") &&
+      ((s.kind === "memory" || s.kind === "record" || s.kind === "knowledge") &&
         s.visibility === "shared")
     );
   return (
     s.owner_id === owner ||
-    ((s.kind === "memory" || s.kind === "record") &&
+    ((s.kind === "memory" || s.kind === "record" || s.kind === "knowledge") &&
       ["shared", "recipient"].includes(s.visibility))
   );
 }
@@ -159,17 +161,35 @@ export function boundedSources(sources: MemorySource[], budget = 24000) {
   const result: MemorySource[] = [];
   for (const source of sources.slice(0, 12)) {
     if (budget < 500) break;
-    const content = source.content.slice(0, Math.min(6000, budget));
+    const details: Record<string, unknown> = {};
+    let detailBudget = Math.min(4000, Math.max(0, budget - 800));
+    let detailsOmitted = false;
+    for (const [key, original] of Object.entries(source.details)) {
+      const value =
+        typeof original === "string" ? original.slice(0, 1200) : original;
+      const size = JSON.stringify({ [key]: value }).length;
+      if (size > detailBudget) {
+        detailsOmitted = true;
+        continue;
+      }
+      details[key] = value;
+      detailBudget -= size;
+      detailsOmitted ||= value !== original;
+    }
+    const overhead = JSON.stringify(details).length + source.title.length + 350;
+    if (budget - overhead < 100) continue;
+    const content = source.content.slice(0, Math.min(6000, budget - overhead));
     result.push({
       ...source,
       content,
       details: {
-        ...source.details,
+        ...details,
         excerpt:
           content.length < source.content.length || !!source.details.excerpt,
+        detailsOmitted,
       },
     });
-    budget -= content.length + source.title.length + 300;
+    budget -= content.length + overhead;
   }
   return result;
 }
