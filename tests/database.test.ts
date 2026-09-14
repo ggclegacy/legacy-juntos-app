@@ -304,3 +304,77 @@ describe("training document privacy and revisions", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("private append-only protocol storage", () => {
+  it("enforces owner isolation and immutable history in PostgreSQL", async () => {
+    await db.exec("reset role");
+    await db.exec(
+      readFileSync("supabase/migrations/003_protocols.sql", "utf8"),
+    );
+    await as(n);
+    const entity = "00000000-0000-4000-8000-000000000090";
+    await db.query(
+      `insert into health_events(id,entity_id,owner_id,workspace_id,revision,payload) values($1,$1,$2,$3,1,'{"kind":"protocol"}')`,
+      [entity, n, w],
+    );
+    await as(k);
+    expect((await db.query("select * from health_events")).rows).toHaveLength(
+      0,
+    );
+    await expect(
+      db.query(
+        `insert into health_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),gen_random_uuid(),$1,$2,1,'{"kind":"lab"}')`,
+        [n, w],
+      ),
+    ).rejects.toThrow();
+    await as(n);
+    await expect(
+      db.exec(`update health_events set payload='{"kind":"lab"}'`),
+    ).rejects.toThrow();
+    await expect(db.exec("delete from health_events")).rejects.toThrow();
+    await expect(
+      db.query(
+        `insert into health_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),$1,$2,$3,3,'{"kind":"protocol"}')`,
+        [entity, n, w],
+      ),
+    ).rejects.toThrow();
+    await db.query(
+      `insert into health_events(id,entity_id,owner_id,workspace_id,revision,payload) values(gen_random_uuid(),$1,$2,$3,2,'{"kind":"protocol"}')`,
+      [entity, n, w],
+    );
+    expect((await db.query("select * from health_events")).rows).toHaveLength(
+      2,
+    );
+  });
+});
+
+describe("private report storage policies", () => {
+  it("blocks another member from listing or writing report paths", async () => {
+    await db.exec("reset role");
+    await db.exec(
+      `create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);alter table storage.objects enable row level security;create function storage.foldername(text) returns text[] language sql immutable as $$ select (string_to_array($1,'/'))[1:array_length(string_to_array($1,'/'),1)-1] $$;grant usage on schema storage to authenticated;grant select,insert on storage.objects to authenticated;`,
+    );
+    await db.exec(
+      readFileSync("supabase/migrations/004_health_reports.sql", "utf8"),
+    );
+    await as(n);
+    await db.query(
+      "insert into storage.objects(bucket_id,name) values('health-reports',$1)",
+      [n + "/example.pdf"],
+    );
+    await as(k);
+    expect((await db.query("select * from storage.objects")).rows).toHaveLength(
+      0,
+    );
+    await expect(
+      db.query(
+        "insert into storage.objects(bucket_id,name) values('health-reports',$1)",
+        [n + "/other.pdf"],
+      ),
+    ).rejects.toThrow();
+    await as(n);
+    expect((await db.query("select * from storage.objects")).rows).toHaveLength(
+      1,
+    );
+  });
+});

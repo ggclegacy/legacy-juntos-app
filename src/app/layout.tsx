@@ -5,6 +5,7 @@ import "@fontsource/cormorant-garamond/500-italic.css";
 import "./globals.css";
 import "./materials.css";
 import "./training.css";
+import "./protocols.css";
 export const metadata: Metadata = {
   title: "Legacy Juntos · Life, together",
   description: "Two lives. Growing individually. Building together.",

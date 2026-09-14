@@ -47,14 +47,16 @@ import { demoRecords, demoMembers, NEIL, WORKSPACE } from "@/lib/demo";
 import { Editor, Modal, kindLabel } from "./editor";
 import { AiPanel } from "./ai-panel";
 import { Performance } from "./performance";
+import { Protocols } from "./protocols";
 import { useMaterialMotion } from "./material-motion";
 
-type View = "home" | Domain;
+type View = "home" | "protocols" | Domain;
 const NAV: { id: View; label: string; icon: LucideIcon; group?: string }[] = [
   { id: "home", label: "Our space", icon: Home },
   { id: "personal", label: "My life", icon: Compass },
   { id: "faith", label: "Faith", icon: BookOpen, group: "GROW" },
   { id: "performance", label: "Performance", icon: Dumbbell },
+  { id: "protocols", label: "Protocols", icon: ShieldCheck },
   { id: "connect", label: "Know & connect", icon: HeartHandshake },
   {
     id: "business",
@@ -344,7 +346,8 @@ export function Sanctuary() {
     setView(next);
     setQuery("");
     setMobileNav(false);
-    if (next === "personal" || next === "performance") setScope("private");
+    if (next === "personal" || next === "performance" || next === "protocols")
+      setScope("private");
   }
   function create(domain: Domain, initial?: Partial<RecordInput>) {
     setEdit({ domain, initial });
@@ -765,7 +768,12 @@ export function Sanctuary() {
           </div>
           <div
             className="page-controls"
-            style={{ display: view === "performance" ? "none" : undefined }}
+            style={{
+              display:
+                view === "performance" || view === "protocols"
+                  ? "none"
+                  : undefined,
+            }}
           >
             <div className="segmented">
               <button
@@ -795,7 +803,11 @@ export function Sanctuary() {
               </label>
               <button
                 className="primary small"
-                onClick={() => create(view === "home" ? "personal" : view)}
+                onClick={() =>
+                  create(
+                    view === "home" || view === "protocols" ? "personal" : view,
+                  )
+                }
               >
                 <Plus size={16} />
                 <span>Add something</span>
@@ -827,7 +839,14 @@ export function Sanctuary() {
               request={request}
             />
           </div>
-          {view === "performance" ? (
+          {view === "protocols" ? (
+            <Protocols
+              key={`${demo}:${workspaceId}:${userId}`}
+              userId={userId}
+              demo={demo}
+              request={request}
+            />
+          ) : view === "performance" ? (
             <TrainingHistory
               records={visible.filter(
                 (r) => r.owner_id === userId && r.domain === "performance",

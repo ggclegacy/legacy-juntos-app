@@ -90,3 +90,7 @@ Sample training is stored in IndexedDB by sample identity. It survives refresh b
 `OPENAI_API_KEY` and `OPENAI_MODEL` enable program generation for authenticated accounts. Generation shares only the submitted preferences, uses the existing request limiter, and validates all returned prescriptions. No health journal or other user's context is retrieved. Live provider behavior and hosted database setup require credentials and must be verified after configuration.
 
 Current limits: programs repeat a rotating sequence for a selected cycle count; automatic calendar scheduling and individual cycle overrides are not implemented. Advanced set styles/groups and cues are stored, but do not automatically reorder supersets or implement intra-set drop sequences. No PDF/photo/XLSX extraction, video uploads, coach portal, wearable/voice integration, push timer alerts, or automatic program mutations. Prep is a private editable planner/journal, not a medical or nutrition prescription engine. See `docs/PERFORMANCE-BUILD.md` for the evidence and remaining implementation sequence.
+
+## Protocol workspace
+
+The **Protocols** navigation includes private protocol history, actual-use logs, manual bloodwork, collection-date context, original-report storage, and appointment review. See [Protocol setup and limitations](docs/protocols.md) and the [research blueprint](docs/protocol-research.md). Connected mode needs migrations 003–004; health AI additionally requires explicit provider configuration. Sample mode must contain fictional information only.
