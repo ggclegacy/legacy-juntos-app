@@ -1,6 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 test.setTimeout(60000);
 async function nav(page: Page, name = "Performance") {
+  // Reload can resolve while the client is still opening the workspace.
+  await expect(
+    page.getByRole("button", { name: "Privacy settings", exact: true }),
+  ).toBeVisible();
   const menu = page.getByRole("button", {
     name: "Open navigation",
     exact: true,
