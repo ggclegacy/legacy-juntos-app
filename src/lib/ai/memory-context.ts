@@ -1,3 +1,4 @@
+import { embedTexts, EMBEDDING_VERSION } from "./embeddings";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ApiError } from "../server";
 import {
@@ -36,6 +37,7 @@ export async function memoryContext(
     context: "private" | "shared";
     message: string;
     recallSources: RecallKind[];
+    semanticRecall?: boolean;
     conversationId?: string;
     conversationRevision?: number;
   },
@@ -125,16 +127,24 @@ export async function memoryContext(
         400,
         "Health and performance recall is private to you.",
       );
-    const { data, error } = await db.rpc("recall_apollo", {
-      p_query: input.message,
-      p_context: input.context,
-      p_sources: input.recallSources,
-      p_limit: 12,
-    });
+    const vector = input.semanticRecall
+      ? (await embedTexts([input.message]))[0]
+      : null;
+    const { data, error } = await db.rpc(
+      vector ? "hybrid_recall_apollo" : "recall_apollo",
+      {
+        p_query: input.message,
+        p_context: input.context,
+        p_sources: input.recallSources,
+        ...(vector
+          ? { p_embedding: vector, p_model: EMBEDDING_VERSION }
+          : { p_limit: 12 }),
+      },
+    );
     if (error)
       throw new ApiError(
         503,
-        "Recall is unavailable. Check the connection and apply memory migration 006 if needed.",
+        "Recall is unavailable. Check the connection and apply memory migrations 006–007 if needed.",
       );
     const found = (data ?? []) as MemorySource[];
     if (

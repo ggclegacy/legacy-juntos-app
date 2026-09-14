@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Sparkles, Lock, Mic, ArrowUp, Copy } from "lucide-react";
+import { ApolloRecall } from "./apollo-recall";
 import { ApolloMemoryLibrary } from "./apollo-memory";
 import {
   recallKinds,
@@ -56,6 +57,7 @@ export function AiPanel({
   const [library, setLibrary] = useState(false),
     [teaching, setTeaching] = useState("");
   const [recallSources, setRecallSources] = useState<RecallKind[]>(["memory"]);
+  const [semanticRecall, setSemanticRecall] = useState(false);
   const [sources, setSources] = useState<MemorySource[]>([]);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [turns, setTurns] = useState<ConversationTurn[]>([]);
@@ -68,7 +70,16 @@ export function AiPanel({
     setConsent(false);
     setResult("");
     setMessage("");
-    setSelected([]);
+    setSelected(
+      (c.record_ids ?? []).filter((id) =>
+        records.some(
+          (r) =>
+            r.id === id &&
+            (c.context === "private" || r.visibility === "shared"),
+        ),
+      ),
+    );
+    setSemanticRecall(false);
     setSources([]);
     setContext(c.context);
     setRecallSources(["memory"]);
@@ -96,6 +107,7 @@ export function AiPanel({
         headers: { "x-expected-user": userId },
         body: JSON.stringify({
           action: "new_conversation",
+          recordIds: selected,
           title: conversationTitle.trim() || "A conversation with Apollo",
           context,
         }),
@@ -123,6 +135,7 @@ export function AiPanel({
     setSelected([]);
     setConsent(false);
     setRecallSources(["memory"]);
+    setSemanticRecall(false);
     setNotice("");
     setError("");
   }
@@ -146,6 +159,7 @@ export function AiPanel({
           recordIds: selected,
           consent,
           recallSources,
+          semanticRecall,
           ...(conversation
             ? {
                 conversationId: conversation.id,
@@ -515,6 +529,20 @@ export function AiPanel({
                     {recallLabels[k]}
                   </label>
                 ))}
+              <ApolloRecall
+                key={`${context}:${recallSources.join(",")}`}
+                context={context}
+                sources={recallSources}
+                enabled={semanticRecall}
+                onEnabled={(value) => {
+                  setSemanticRecall(value);
+                  setConsent(false);
+                }}
+                request={request}
+                userId={userId}
+                demo={demo}
+                disabled={busy}
+              />
               <p className="muted">
                 Turn off every area for no cross-conversation recall. Recent
                 turns still accompany a saved conversation.
@@ -546,8 +574,9 @@ export function AiPanel({
             <details>
               <summary>Choose context · {selected.length} entries</summary>
               <p className="muted">
-                These entries are sent in addition to any memory areas you
-                enable.
+                Selected entries are linked when you create a saved conversation
+                and restored when you reopen it. These entries are sent in
+                addition to any memory areas you enable.
               </p>
               {eligible.slice(0, 40).map((r) => (
                 <label className="check-label context-item" key={r.id}>

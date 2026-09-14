@@ -1,4 +1,5 @@
 "use client";
+import { ApolloLearning } from "./apollo-learning";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
@@ -203,6 +204,39 @@ export function ApolloMemoryLibrary({
           account stores them securely across devices.
         </p>
       )}
+      <ApolloLearning
+        initialText={initialTeaching}
+        demo={demo}
+        userId={userId}
+        request={request}
+        onReview={(s) => {
+          setEditing(s.existing ?? null);
+          const base = s.existing
+            ? {
+                title: s.existing.title,
+                content: s.existing.content,
+                category: s.existing.category,
+                visibility: s.existing.visibility,
+                recipient_id: s.existing.recipient_id,
+                status: s.existing.status,
+                pinned: s.existing.pinned,
+                effective_on: s.existing.effective_on,
+                source_note: s.existing.source_note,
+                source_url: s.existing.source_url,
+              }
+            : fresh();
+          setDraft({
+            ...base,
+            title: s.title,
+            content: s.content,
+            category: s.category,
+            source_note: `User statement: ${s.quote}`.slice(0, 1000),
+          });
+          setNotice(
+            "Review the wording and audience below, then save when it is right.",
+          );
+        }}
+      />
       <div className="segmented">
         <button
           disabled={busy}

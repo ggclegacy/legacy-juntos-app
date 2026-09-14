@@ -58,6 +58,7 @@ export type ApolloMemory = MemoryInput & {
   updated_at: string;
 };
 export type Conversation = {
+  record_ids?: string[];
   id: string;
   owner_id: string;
   workspace_id: string;
@@ -104,6 +105,7 @@ export const memoryActionSchema = z.discriminatedUnion("action", [
   z
     .object({
       action: z.literal("new_conversation"),
+      recordIds: z.array(z.uuid()).max(12).default([]),
       title: z.string().trim().min(1).max(180),
       context: z.enum(["private", "shared"]),
     })

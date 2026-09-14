@@ -39,6 +39,7 @@ beforeAll(async () => {
     "003_protocols.sql",
     "005_nutrition.sql",
     "006_apollo_memory.sql",
+    "007_apollo_intelligence.sql",
   ])
     await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
   await db.query("insert into auth.users values($1),($2),($3)", [n, k, o]);
@@ -332,4 +333,115 @@ it("revoked members lose memory and recall", async () => {
     ).rows,
   ).toHaveLength(0);
   await expect(teach("Revoked")).rejects.toThrow(/row-level security/);
+});
+
+const vector = Array.from({ length: 512 }, (_, i) => (i === 0 ? 1 : 0));
+const embeddingModel = "text-embedding-3-small:512:source-v1";
+async function indexMemory(id: string, context = "private") {
+  return db.query(
+    "insert into apollo_embeddings(owner_id,workspace_id,context,kind,source_id,source_version,model,embedding) select auth.uid(),$1,$2,'memory',id,revision::text,$4,$5 from apollo_memories where id=$3",
+    [w, context, id, embeddingModel, vector],
+  );
+}
+it("recalls paraphrases using a synthetic vector while keeping audience indexes separate", async () => {
+  await as(n);
+  const id = await teach("Restoring energy after hard sessions");
+  await indexMemory(id);
+  const found = await db.query<{ id: string }>(
+    "select id from hybrid_recall_apollo('How should I recover?', 'private',array['memory'],$1,$2)",
+    [vector, embeddingModel],
+  );
+  expect(found.rows.map((r) => r.id)).toContain(id);
+  expect(
+    (
+      await db.query(
+        "select * from hybrid_recall_apollo('How should I recover?','shared',array['memory'],$1,$2)",
+        [vector, embeddingModel],
+      )
+    ).rows.map((r) => (r as { id: string }).id),
+  ).not.toContain(id);
+  await as(k);
+  expect(
+    (await db.query("select * from apollo_embeddings where source_id=$1", [id]))
+      .rows,
+  ).toHaveLength(0);
+  await expect(indexMemory(id, "shared")).resolves.toBeDefined(); // RLS yields no source rows.
+  await as(n);
+  await expect(indexMemory(id, "shared")).rejects.toThrow(
+    /Source changed or unavailable/,
+  );
+});
+it("purges both users' derived vectors when a shared teaching changes", async () => {
+  await as(n);
+  const id = await teach("Joint launch direction", "shared");
+  await indexMemory(id, "shared");
+  await as(k);
+  await indexMemory(id, "shared");
+  await as(n);
+  await db.query(
+    "update apollo_memories set content='Updated direction',revision=revision+1 where id=$1",
+    [id],
+  );
+  expect(
+    (await db.query("select * from apollo_embeddings where source_id=$1", [id]))
+      .rows,
+  ).toHaveLength(0);
+  await as(k);
+  expect(
+    (await db.query("select * from apollo_embeddings where source_id=$1", [id]))
+      .rows,
+  ).toHaveLength(0);
+  await expect(
+    db.query(
+      "insert into apollo_embeddings(owner_id,workspace_id,context,kind,source_id,source_version,model,embedding) values(auth.uid(),$1,'shared','memory',$2,'1',$3,$4)",
+      [w, id, embeddingModel, vector],
+    ),
+  ).rejects.toThrow(/Source changed/);
+});
+it("retrieves from a synthetic archive and removes deleted vectors", async () => {
+  await as(n);
+  for (let i = 0; i < 36; i++) await teach(`Monthly archive ${i}`);
+  const id = await teach("An archived decision about next season");
+  await indexMemory(id);
+  const results = await db.query<{ id: string }>(
+    "select id from hybrid_recall_apollo('future season decision','private',array['memory'],$1,$2)",
+    [vector, embeddingModel],
+  );
+  expect(results.rows.map((r) => r.id)).toContain(id);
+  await db.query("delete from apollo_memories where id=$1", [id]);
+  expect(
+    (await db.query("select * from apollo_embeddings where source_id=$1", [id]))
+      .rows,
+  ).toHaveLength(0);
+  const status = await db.query<{ total: number; indexed: number }>(
+    "select * from apollo_index_status('private',array['memory'],$1)",
+    [embeddingModel],
+  );
+  expect(Number(status.rows[0].total)).toBeGreaterThan(36);
+});
+it("validates persistent conversation connections at the data boundary", async () => {
+  await as(n);
+  const record = (
+    await db.query<{ id: string }>(
+      "insert into records(workspace_id,owner_id,domain,kind,title) values($1,auth.uid(),'business','project','Launch') returning id",
+      [w],
+    )
+  ).rows[0].id;
+  await db.query(
+    "insert into apollo_conversations(workspace_id,owner_id,title,context,record_ids) values($1,auth.uid(),'My launch','private',$2)",
+    [w, [record]],
+  );
+  await expect(
+    db.query(
+      "insert into apollo_conversations(workspace_id,owner_id,title,context,record_ids) values($1,auth.uid(),'Shared launch','shared',$2)",
+      [w, [record]],
+    ),
+  ).rejects.toThrow(/unavailable/);
+  await as(k);
+  await expect(
+    db.query(
+      "insert into apollo_conversations(workspace_id,owner_id,title,context,record_ids) values($1,auth.uid(),'Other launch','private',$2)",
+      [w, [record]],
+    ),
+  ).rejects.toThrow(/unavailable/);
 });

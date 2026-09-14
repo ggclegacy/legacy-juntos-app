@@ -70,6 +70,7 @@ export const apolloRequestSchema = z
         "Select each entry only once.",
       ),
     consent: z.literal(true),
+    semanticRecall: z.boolean().default(false),
     recallSources: z.array(z.enum(recallKinds)).max(6).default([]),
     conversationId: z.uuid().optional(),
     conversationRevision: z.number().int().nonnegative().optional(),
