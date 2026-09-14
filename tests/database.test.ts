@@ -38,6 +38,7 @@ beforeAll(async () => {
     `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;grant usage on schema auth to anon,authenticated;grant execute on function auth.uid() to anon,authenticated;`,
   );
   await db.exec(readFileSync("supabase/migrations/001_foundation.sql", "utf8"));
+  await db.exec(readFileSync("supabase/migrations/002_training.sql", "utf8"));
   await db.query("insert into auth.users values($1),($2),($3)", [n, k, o]);
   await db.query(
     "insert into public.workspaces(id,name) values($1,'Juntos'),($2,'Other')",
@@ -238,5 +239,68 @@ describe("actual PostgreSQL RLS and write constraints", () => {
       (await db.query<{ ok: boolean }>("select consume_ai_request() as ok"))
         .rows[0].ok,
     ).toBe(false);
+  });
+});
+
+describe("training document privacy and revisions", () => {
+  const id = "00000000-0000-4000-8000-000000000088";
+  it("only the owner can read training even inside the same workspace", async () => {
+    await as(n);
+    await db.query(
+      "insert into training_documents(id,owner_id,workspace_id,payload) values($1,$2,$3,$4)",
+      [id, n, w, JSON.stringify({ kind: "program", name: "Private training" })],
+    );
+    await as(k);
+    expect(
+      (await db.query("select * from training_documents")).rows,
+    ).toHaveLength(0);
+    await expect(
+      db.query(
+        "insert into training_documents(id,owner_id,workspace_id,payload) values(gen_random_uuid(),$1,$2,$3)",
+        [n, w, JSON.stringify({ kind: "prep" })],
+      ),
+    ).rejects.toThrow();
+  });
+  it("rejects other-owner updates and stale revisions", async () => {
+    await as(k);
+    expect(
+      (
+        await db.query(
+          "update training_documents set revision=2 where id=$1 returning id",
+          [id],
+        )
+      ).rows,
+    ).toHaveLength(0);
+    await as(n);
+    await db.query(
+      "update training_documents set revision=2 where id=$1 and revision=1",
+      [id],
+    );
+    expect(
+      (
+        await db.query(
+          "update training_documents set revision=2 where id=$1 and revision=1 returning id",
+          [id],
+        )
+      ).rows,
+    ).toHaveLength(0);
+    await expect(
+      db.query("update training_documents set revision=2 where id=$1", [id]),
+    ).rejects.toThrow();
+  });
+  it("does not allow transferring owner or workspace", async () => {
+    await as(n);
+    await expect(
+      db.query(
+        "update training_documents set revision=3,owner_id=$1 where id=$2",
+        [k, id],
+      ),
+    ).rejects.toThrow();
+    await expect(
+      db.query(
+        "update training_documents set revision=3,workspace_id=$1 where id=$2",
+        [w2, id],
+      ),
+    ).rejects.toThrow();
   });
 });

@@ -52,7 +52,7 @@ test("all workspaces render without browser errors or horizontal overflow", asyn
     "Our space",
   ]) {
     await nav(page, name);
-    await expect(page.locator("main h1")).toBeVisible();
+    await expect(page.locator("main h1:visible")).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth + 1,
@@ -116,29 +116,6 @@ test("sharing requires explicit confirmation and can be revoked", async ({
   await expect(
     page.getByText("Deliberate sharing", { exact: true }),
   ).toHaveCount(0);
-});
-test("logs real sets and computes volume in the chosen unit", async ({
-  page,
-}) => {
-  await start(page);
-  await nav(page, "Performance");
-  await page
-    .locator(".performance-overview")
-    .getByRole("button", { name: "Log a workout", exact: true })
-    .click();
-  await page.getByLabel("Title", { exact: true }).fill("Test lower body");
-  await page.getByLabel("Exercise 1", { exact: true }).fill("Goblet squat");
-  await page.getByLabel("Reps 1", { exact: true }).fill("8");
-  await page.getByLabel("Load 1", { exact: true }).fill("20");
-  await page.getByLabel("Unit 1", { exact: true }).selectOption("kg");
-  await page.getByRole("button", { name: "Save privately" }).click();
-  await page
-    .getByRole("button", { name: "Open Test lower body", exact: true })
-    .click();
-  await expect(page.getByText("160", { exact: true })).toBeVisible();
-  await expect(
-    page.getByRole("cell", { name: "20 kg", exact: true }),
-  ).toBeVisible();
 });
 test("private communication guide never sends or shares automatically", async ({
   page,
@@ -214,7 +191,7 @@ test("faith reflection starts private and AI context does not persist across aud
 test("protected API routes reject unauthenticated access", async ({
   request,
 }) => {
-  for (const route of ["/api/records", "/api/bootstrap"]) {
+  for (const route of ["/api/records", "/api/bootstrap", "/api/training"]) {
     const r = await request.get(route);
     expect(r.status()).toBe(401);
     expect((await r.json()).error).toContain("Sign in");

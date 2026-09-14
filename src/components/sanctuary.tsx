@@ -46,6 +46,7 @@ import {
 import { demoRecords, demoMembers, NEIL, WORKSPACE } from "@/lib/demo";
 import { Editor, Modal, kindLabel } from "./editor";
 import { AiPanel } from "./ai-panel";
+import { Performance } from "./performance";
 import { useMaterialMotion } from "./material-motion";
 
 type View = "home" | Domain;
@@ -211,7 +212,6 @@ export function Sanctuary() {
     [error, setError] = useState(""),
     [loading, setLoading] = useState(false),
     [promptIndex, setPromptIndex] = useState(0),
-    [prep, setPrep] = useState(false),
     [deleteId, setDeleteId] = useState<string | null>(null),
     [deleting, setDeleting] = useState(false);
   const [email, setEmail] = useState(""),
@@ -735,7 +735,7 @@ export function Sanctuary() {
           <div className="demo-bar">
             <span>
               <span className="status-dot" /> Sample workspace · illustrative
-              entries · changes last this session
+              entries
             </span>
             <button
               onClick={() => {
@@ -763,7 +763,10 @@ export function Sanctuary() {
               <span /> Rooted in purpose. Alive with possibility.
             </span>
           </div>
-          <div className="page-controls">
+          <div
+            className="page-controls"
+            style={{ display: view === "performance" ? "none" : undefined }}
+          >
             <div className="segmented">
               <button
                 aria-pressed={scope === "shared"}
@@ -815,7 +818,22 @@ export function Sanctuary() {
               Refreshing your space…
             </p>
           )}
-          {view === "home" && !query ? (
+          <div hidden={view !== "performance"}>
+            <Performance
+              key={`${demo}:${workspaceId}:${userId}`}
+              userId={userId}
+              workspaceId={workspaceId}
+              demo={demo}
+              request={request}
+            />
+          </div>
+          {view === "performance" ? (
+            <TrainingHistory
+              records={visible.filter(
+                (r) => r.owner_id === userId && r.domain === "performance",
+              )}
+            />
+          ) : view === "home" && !query ? (
             <>
               <section className="hero">
                 <div className="hero-artwork" aria-hidden="true" />
@@ -1080,117 +1098,6 @@ export function Sanctuary() {
                   </div>
                 </div>
               )}
-              {view === "performance" && (
-                <>
-                  <div className="performance-overview">
-                    <div>
-                      <span className="eyebrow">YOUR TRAINING JOURNAL</span>
-                      <div className="large-stat">
-                        {filtered.filter((r) => r.kind === "workout").length}
-                        <span>logged sessions</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="eyebrow">
-                        CONSISTENCY, ON YOUR TERMS
-                      </span>
-                      <h3>Train. Recover. Repeat.</h3>
-                      <p>Your progress belongs to you.</p>
-                    </div>
-                    <button
-                      className="primary"
-                      onClick={() => create("performance", { kind: "workout" })}
-                    >
-                      <Plus size={16} /> Log a workout
-                    </button>
-                  </div>
-                  <div className="prep-bar">
-                    <div>
-                      <Flag size={18} />
-                      <span>
-                        Prep Mode
-                        <small>
-                          Competition planner · this view stays on for this
-                          session
-                        </small>
-                      </span>
-                    </div>
-                    <button
-                      className={`switch ${prep ? "on" : ""}`}
-                      role="switch"
-                      aria-checked={prep}
-                      aria-label="Prep Mode"
-                      onClick={() => setPrep(!prep)}
-                    >
-                      <span />
-                    </button>
-                  </div>
-                  {prep && (
-                    <div className="prep-content">
-                      <h3>
-                        A stage is a milestone. Your health is the foundation.
-                      </h3>
-                      <p>
-                        Plan posing, check-ins, travel, and coach-directed
-                        milestones. This planner does not prescribe diet, drugs,
-                        or peak-week protocols.
-                      </p>
-                      <div className="inline-actions">
-                        <button
-                          className="secondary"
-                          onClick={() =>
-                            create("performance", {
-                              kind: "prep",
-                              title: "Competition milestone",
-                              metadata: { prep: true },
-                            })
-                          }
-                        >
-                          Add prep milestone <Plus size={15} />
-                        </button>
-                        <button
-                          className="text-button"
-                          onClick={() =>
-                            create("performance", {
-                              kind: "prep",
-                              title: "Posing practice",
-                              metadata: { prep: true },
-                            })
-                          }
-                        >
-                          Log posing practice
-                        </button>
-                        <button
-                          className="text-button"
-                          onClick={() =>
-                            create("business", {
-                              kind: "project",
-                              title: "Sponsorship plan",
-                            })
-                          }
-                        >
-                          Plan sponsorship
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <div className="inline-actions wellness-actions">
-                    <button
-                      className="text-button"
-                      onClick={() =>
-                        create("performance", { kind: "wellness" })
-                      }
-                    >
-                      <Leaf size={15} /> Log recovery & wellness
-                    </button>
-                    <span className="muted">
-                      Tracking supports your plan. Medical concerns belong with
-                      a qualified professional.
-                    </span>
-                  </div>
-                </>
-              )}
-              {view === "performance" && <TrainingHistory records={filtered} />}
               {view === "business" && (
                 <div className="budget-strip">
                   <div>
@@ -1800,7 +1707,6 @@ export function Sanctuary() {
                     setDetail(null);
                     setEdit(null);
                     setAi(false);
-                    setPrep(false);
                   }}
                 >
                   {demoMembers.map((m) => (
@@ -1837,8 +1743,10 @@ export function Sanctuary() {
               </button>
             )}
             <p className="muted">
-              No private content is stored in the offline cache. AI, voice, and
-              image services require their own configured connections.
+              Training device drafts are opt-in for connected accounts and
+              remain on a trusted device until cleared in Performance. AI,
+              voice, and image services require their own configured
+              connections.
             </p>
           </div>
         </Modal>

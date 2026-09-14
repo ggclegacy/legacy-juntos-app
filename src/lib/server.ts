@@ -26,6 +26,12 @@ export async function actor(request: Request) {
   } = await db.auth.getUser(token);
   if (error || !user)
     throw new ApiError(401, "Your session has expired. Please sign in again.");
+  const expectedUser = request.headers.get("x-expected-user");
+  if (expectedUser && expectedUser !== user.id)
+    throw new ApiError(
+      401,
+      "Your account changed. Return to your training space before retrying.",
+    );
   const { data: membership, error: memberError } = await db
     .from("memberships")
     .select("*")
@@ -39,7 +45,7 @@ export async function actor(request: Request) {
     );
   return { db, user, membership };
 }
-export async function body(request: Request) {
+export async function body(request: Request, limit = 32000) {
   const reader = request.body?.getReader();
   if (!reader) throw new ApiError(400, "A request body is required.");
   const chunks: Uint8Array[] = [];
@@ -48,7 +54,7 @@ export async function body(request: Request) {
     const part = await reader.read();
     if (part.done) break;
     length += part.value.byteLength;
-    if (length > 32000) {
+    if (length > limit) {
       await reader.cancel();
       throw new ApiError(413, "This entry is too long.");
     }
