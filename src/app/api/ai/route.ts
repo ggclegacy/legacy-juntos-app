@@ -1,20 +1,11 @@
 import { actor, body, failure, ApiError } from "@/lib/server";
 import { contextRecords } from "@/lib/model";
 import { OpenAIProvider } from "@/lib/ai/provider";
-import { z } from "zod";
+import { apolloRequestSchema } from "@/lib/ai/apollo";
 export async function POST(request: Request) {
   try {
     const { db, user, membership } = await actor(request);
-    const parsed = z
-      .object({
-        message: z.string().trim().min(1).max(6000),
-        context: z.enum(["private", "shared"]),
-        mode: z.enum(["bridge", "companion"]),
-        recordIds: z.array(z.uuid()).max(12),
-        consent: z.literal(true),
-      })
-      .strict()
-      .safeParse(await body(request));
+    const parsed = apolloRequestSchema.safeParse(await body(request));
     if (!parsed.success)
       throw new ApiError(
         400,
@@ -67,6 +58,8 @@ export async function POST(request: Request) {
       parsed.data.recordIds,
     );
     if (
+      current.user.id !== user.id ||
+      current.membership.workspace_id !== membership.workspace_id ||
       freshError ||
       stillAllowed.length !== records.length ||
       stillAllowed.some(

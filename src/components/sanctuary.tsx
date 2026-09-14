@@ -690,7 +690,7 @@ export function Sanctuary() {
         <button className="sidebar-ai" onClick={() => setAi(true)}>
           <Sparkles size={19} />
           <span>
-            A space to think<small>Your Juntos assistant</small>
+            Meet Apollo<small>Your coach & thinking partner</small>
           </span>
           <ArrowUpRight size={15} />
         </button>
@@ -1383,11 +1383,11 @@ export function Sanctuary() {
       </div>
       <button
         className="floating-ai"
-        aria-label="Open Juntos assistant"
+        aria-label="Open Apollo"
         onClick={() => setAi(true)}
       >
         <Sparkles size={20} />
-        <span>Think with Juntos</span>
+        <span>Think with Apollo</span>
       </button>
       {notice && (
         <div role="status" className="toast">
@@ -1406,6 +1406,8 @@ export function Sanctuary() {
       )}
       {ai && (
         <AiPanel
+          key={`${demo}:${workspaceId}:${userId}`}
+          userId={userId}
           records={visible}
           demo={demo}
           request={request}

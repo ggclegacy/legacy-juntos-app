@@ -50,6 +50,7 @@ export function Modal({
   }, []);
   return (
     <dialog
+      aria-label={title}
       ref={ref}
       className={`modal ${wide ? "wide" : ""}`}
       onCancel={onClose}

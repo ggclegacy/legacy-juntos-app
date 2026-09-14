@@ -2401,3 +2401,11 @@ th {
   .sidebar { visibility: hidden; }
   .sidebar.open { visibility: visible; }
 }
+
+/* Apollo conversation preferences */
+.apollo-preferences,.apollo-principles{margin:18px 0;padding:16px;border:1px solid #c7e8d52b;border-radius:14px;background:#103a293b}
+.apollo-preferences summary,.apollo-principles summary{cursor:pointer;color:#e4ca90;font-size:13px}
+.apollo-controls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.apollo-principles ol{padding-left:22px;line-height:1.75;font-size:12px;color:#b8cdbf}
+.apollo-principles li{margin:9px 0}.apollo-principles strong{color:#ead7ae}
+@media(max-width:550px){.apollo-controls{grid-template-columns:1fr}}

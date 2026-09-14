@@ -98,3 +98,7 @@ The **Protocols** navigation includes private protocol history, actual-use logs,
 ## Macro workspace
 
 **Macros** now includes a private daily diary, coach-set training/rest targets, planned and eaten meals, food library, weighed batch recipes, barcode capture, photo/text/label draft entry, water counter and seven-day history. Manual/sample flows work immediately. Connected storage needs migration 005, database search needs `USDA_API_KEY`, and photo/text/label AI needs configured image-capable OpenAI credentials plus `NUTRITION_AI_ENABLED=true`. See [Nutrition setup and limitations](docs/nutrition.md) and [nutrition research](docs/nutrition-research.md). Photo estimates always require review; targets never change automatically.
+
+## Apollo identity
+
+Apollo now has a versioned identity shared by the main assistant and specialized AI operations, ten help roles, and per-panel controls for approach, tone, depth and language. See [the ten-principle research](docs/apollo/RESEARCH.md) and [implementation / behavioral evaluation](docs/apollo/IMPLEMENTATION.md). The server owns instructions and preserves selected-record privacy. This is the identity layer; a full subject knowledge library, durable chat memory and autonomous actions remain separate work. Live-model evaluations use synthetic scenarios and are opt-in.

@@ -3,13 +3,24 @@ import { useState } from "react";
 import { Sparkles, Lock, Mic, ArrowUp, Copy } from "lucide-react";
 import { Modal } from "./editor";
 import type { LifeRecord, RecordInput } from "@/lib/model";
+import {
+  apolloModes,
+  modeLabels,
+  modeStarters,
+  apolloPrinciples,
+  defaultApolloPreferences,
+  type ApolloMode,
+  type ApolloPreferences,
+} from "@/lib/ai/apollo";
 export function AiPanel({
+  userId,
   records,
   demo,
   onClose,
   request,
   onDraft,
 }: {
+  userId: string;
   records: LifeRecord[];
   demo: boolean;
   onClose: () => void;
@@ -20,7 +31,10 @@ export function AiPanel({
   onDraft: (draft: Partial<RecordInput>) => void;
 }) {
   const [context, setContext] = useState<"private" | "shared">("private"),
-    [mode, setMode] = useState<"bridge" | "companion">("bridge");
+    [mode, setMode] = useState<ApolloMode>("auto");
+  const [preferences, setPreferences] = useState<ApolloPreferences>(
+    defaultApolloPreferences,
+  );
   const [message, setMessage] = useState(""),
     [result, setResult] = useState(""),
     [selected, setSelected] = useState<string[]>([]),
@@ -39,10 +53,12 @@ export function AiPanel({
     try {
       const data = await request("/api/ai", {
         method: "POST",
+        headers: { "x-expected-user": userId },
         body: JSON.stringify({
           message,
           context,
           mode,
+          preferences,
           recordIds: selected,
           consent,
         }),
@@ -55,16 +71,18 @@ export function AiPanel({
     }
   }
   return (
-    <Modal title="A little space to think." onClose={onClose} wide>
+    <Modal title="Apollo" onClose={onClose} wide>
       <div className="ai-panel">
         <div className="ai-emblem">
           <Sparkles size={26} />
         </div>
         <p className="lead">
-          Find your words. Explore an idea. Take the next step with intention.
+          Your AI coach, companion, and thinking partner. Faith, strength,
+          wellbeing, and everything you’re building.
         </p>
         <div className="segmented">
           <button
+            disabled={busy}
             aria-pressed={context === "private"}
             onClick={() => {
               setContext("private");
@@ -77,6 +95,7 @@ export function AiPanel({
             Private to me
           </button>
           <button
+            disabled={busy}
             aria-pressed={context === "shared"}
             onClick={() => {
               setContext("shared");
@@ -98,25 +117,116 @@ export function AiPanel({
           </span>
         </div>
         <label>
-          How can this space help?
+          How can Apollo help?
           <select
+            disabled={busy}
             value={mode}
-            onChange={(e) => setMode(e.target.value as "bridge" | "companion")}
+            onChange={(e) => setMode(e.target.value as ApolloMode)}
           >
-            <option value="bridge">Communication bridge</option>
-            <option value="companion">Planning & reflection</option>
+            {apolloModes.map((m) => (
+              <option value={m} key={m}>
+                {modeLabels[m]}
+              </option>
+            ))}
           </select>
         </label>
+        <details className="apollo-preferences">
+          <summary>Make this conversation yours</summary>
+          <p className="muted">
+            These choices apply while this panel is open. They never change who
+            can see your information.
+          </p>
+          <div className="apollo-controls">
+            {(
+              [
+                [
+                  "approach",
+                  "What would help?",
+                  [
+                    ["adaptive", "Follow my lead"],
+                    ["listen", "Listen first"],
+                    ["plan", "Help me plan"],
+                    ["teach", "Explain it to me"],
+                  ],
+                ],
+                [
+                  "tone",
+                  "Coaching tone",
+                  [
+                    ["balanced", "Warm & candid"],
+                    ["gentle", "Gentle"],
+                    ["direct", "Direct"],
+                  ],
+                ],
+                [
+                  "depth",
+                  "Response depth",
+                  [
+                    ["concise", "Keep it short"],
+                    ["balanced", "Balanced"],
+                    ["deep", "Go deeper"],
+                  ],
+                ],
+                [
+                  "language",
+                  "Response language",
+                  [
+                    ["auto", "Follow my language"],
+                    ["en", "English"],
+                    ["pt-BR", "Português (Brasil)"],
+                  ],
+                ],
+              ] as const
+            ).map(([key, label, options]) => (
+              <label key={key}>
+                {label}
+                <select
+                  disabled={busy}
+                  value={preferences[key]}
+                  onChange={(e) =>
+                    setPreferences({ ...preferences, [key]: e.target.value })
+                  }
+                >
+                  {options.map(([value, label]) => (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        </details>
+        <details className="apollo-principles">
+          <summary>What Apollo stands for</summary>
+          <p className="muted">
+            One identity, many ways to help. You keep the final say.
+          </p>
+          <ol>
+            {apolloPrinciples.map(([name, description]) => (
+              <li key={name}>
+                <strong>{name}.</strong> {description}
+              </li>
+            ))}
+          </ol>
+          <p className="muted">
+            Apollo sees your current message and the entries you select. This
+            chat does not automatically read your workouts, nutrition,
+            protocols, or previous conversations, and cannot schedule or send
+            anything.
+          </p>
+        </details>
         <form onSubmit={send}>
           <label>
             Your starting point
             <textarea
               required
+              disabled={busy}
               maxLength={6000}
               rows={4}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="I want to explain something, but I’m still finding the words…"
+              placeholder={modeStarters[mode]}
             />
           </label>
           <details>
@@ -129,7 +239,9 @@ export function AiPanel({
                 <input
                   type="checkbox"
                   checked={selected.includes(r.id)}
-                  disabled={!selected.includes(r.id) && selected.length >= 12}
+                  disabled={
+                    busy || (!selected.includes(r.id) && selected.length >= 12)
+                  }
                   onChange={(e) =>
                     setSelected(
                       e.target.checked
@@ -145,6 +257,7 @@ export function AiPanel({
           <label className="check-label">
             <input
               type="checkbox"
+              disabled={busy}
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
             />
@@ -164,15 +277,16 @@ export function AiPanel({
               <Mic size={17} /> Voice
             </button>
             <button className="primary" disabled={!consent || busy || demo}>
-              {busy ? "Thinking…" : "Ask Juntos"}
+              {busy ? "Thinking…" : "Ask Apollo"}
               <ArrowUp size={17} />
             </button>
           </div>
         </form>
         {demo && (
           <p className="muted">
-            Sample workspace · live AI is not connected. Try the private
-            drafting guide below.
+            Sample workspace · Apollo’s identity and controls are ready. Live
+            responses need a connected account and AI service. The guide below
+            works without AI.
           </p>
         )}
         {notice && (

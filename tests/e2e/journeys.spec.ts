@@ -121,14 +121,12 @@ test("private communication guide never sends or shares automatically", async ({
   page,
 }) => {
   await start(page);
-  await page
-    .getByRole("button", { name: "Open Juntos assistant", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Open Apollo", exact: true }).click();
   await page
     .getByLabel("Your starting point")
     .fill("I would like to clarify our plans.");
   await expect(
-    page.getByRole("button", { name: "Ask Juntos", exact: true }),
+    page.getByRole("button", { name: "Ask Apollo", exact: true }),
   ).toBeDisabled();
   await page.getByRole("button", { name: "Voice", exact: true }).click();
   await expect(
@@ -179,9 +177,7 @@ test("faith reflection starts private and AI context does not persist across aud
     "Colossians 3:12–17",
   );
   await page.getByRole("button", { name: "Close", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Open Juntos assistant", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Open Apollo", exact: true }).click();
   await page.getByLabel("Your starting point").fill("Private working thought");
   await page
     .getByRole("button", { name: "Juntos context", exact: true })
