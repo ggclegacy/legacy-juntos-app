@@ -7,6 +7,7 @@ import "./materials.css";
 import "./training.css";
 import "./protocols.css";
 import "./nutrition.css";
+import "./studio.css";
 export const metadata: Metadata = {
   title: "Legacy Juntos · Life, together",
   description: "Two lives. Growing individually. Building together.",
